@@ -2,7 +2,7 @@
 
 ## Status convention
 
-Phases 0 and 1 are complete. All later phases are planned and must be validated
+Phases 0, 1, and 2 are complete. All later phases are planned and must be validated
 before their status is changed or this file is updated.
 
 ## Phase 0 — Documentation and repository foundation — Completed
@@ -39,7 +39,7 @@ server-only configuration boundaries.
 - `npm.cmd run typecheck` — passed (`tsc --noEmit`).
 - `npm.cmd run build` — passed; Next.js production build completed successfully.
 
-## Phase 2 — Static cinematic interface — Planned
+## Phase 2 — Static cinematic interface — Completed
 
 **Scope:** Build static, accessible lab screens using clearly fictional content.
 
@@ -49,7 +49,12 @@ states without live logic.
 **Acceptance criteria:** The interface communicates the lab workflow and labels
 all demo content as fictional.
 
-**Validation:** Run lint, tests, type checking, build, and accessibility review.
+**Validation:** Passed on 2026-07-27.
+
+- `npm.cmd run lint` — passed with no ESLint findings.
+- `npm.cmd run typecheck` — passed (`tsc --noEmit`).
+- `npm.cmd run build` — passed; the static routes compiled and prerendered successfully.
+- Visual browser review could not run because no browser surface was available in the environment.
 
 ## Phase 3 — Fictional movie concepts and ballot form — Planned
 

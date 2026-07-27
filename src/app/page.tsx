@@ -1,8 +1,13 @@
+import { BallotPreview } from "@/components/BallotPreview";
+import { ContinuityIssueCard } from "@/components/ContinuityIssueCard";
+import { CreatorApprovalPreview } from "@/components/CreatorApprovalPreview";
+import { MovieConceptCard } from "@/components/MovieConceptCard";
+import { ResultsPreview } from "@/components/ResultsPreview";
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
+import { WorkflowSteps } from "@/components/WorkflowSteps";
+import { movieConcepts } from "@/data/demo-data";
+
 export default function Home() {
-  return (
-    <main>
-      <h1>Viewers Cut</h1>
-      <p>Audience choices become creator-approved movie stories.</p>
-    </main>
-  );
+  return <div id="top" className="site-shell"><SiteHeader /><main><section className="hero" aria-labelledby="hero-title"><p className="eyebrow">Audience-driven story development</p><h1 id="hero-title">The audience finds the spark. The creator makes the movie.</h1><p className="hero-copy">Viewers Cut turns curated creative choices into a creator-approved direction for fictional movie stories.</p><div className="hero-actions"><a className="button" href="#discover">Explore Movie Concepts</a><a className="button button-quiet" href="#how-it-works">See How It Works</a></div><p className="demo-disclaimer">All current projects, vote counts, and results are fictional demo content.</p><div className="hero-frame" aria-hidden="true"><span>SCENE 01</span><b>VC</b><i>ROLLING</i></div></section><section className="section concepts" id="discover" aria-labelledby="concepts-title"><div className="section-heading"><p className="eyebrow">Featured fictional concepts</p><h2 id="concepts-title">Three stories, waiting for a direction.</h2><p>Every concept is original fictional demo content created for this prototype.</p></div><div className="concept-grid">{movieConcepts.map((concept) => <MovieConceptCard concept={concept} key={concept.title} />)}</div></section><BallotPreview /><WorkflowSteps /><ResultsPreview /><CreatorApprovalPreview /><section className="section continuity" aria-labelledby="continuity-title"><div className="section-heading"><p className="eyebrow">Continuity review preview</p><h2 id="continuity-title">Keep every story detail in focus.</h2><p>Fictional example findings from a future continuity and story-logic review.</p></div><div className="issue-grid"><ContinuityIssueCard severity="Needs review" title="Prop contradiction" text="The brass key is described as returned in scene two, then appears in the archivist's pocket." /><ContinuityIssueCard severity="Question" title="Character knowledge gap" text="The mapmaker recognizes the station name before the clue has been introduced." /><ContinuityIssueCard severity="Needs review" title="Timeline inconsistency" text="The ferry crosses at dawn after the same scene establishes that it is still before midnight." /></div></section></main><SiteFooter /></div>;
 }
