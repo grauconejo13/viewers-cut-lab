@@ -1,31 +1,13 @@
-/** Fictional demo content only. It does not represent real films, votes, or demand. */
-export type MovieConcept = {
-  title: string;
-  genre: string;
-  logline: string;
-  tones: string[];
-  status: string;
-  demoBallots: string;
-  posterClass: string;
-  posterMark: string;
-};
-
-export const movieConcepts: MovieConcept[] = [
-  { title: "The Luminous Archive", genre: "Mystery / Science Fiction", logline: "A night archivist finds a city map that redraws itself around forgotten memories.", tones: ["Atmospheric", "Tender", "Uncanny"], status: "Round open · Fictional demo", demoBallots: "1,248 fictional ballots", posterClass: "archive", posterMark: "LA" },
-  { title: "Low Tide, High Wire", genre: "Coastal Thriller", logline: "Two estranged siblings trace a missing ferry across a storm-struck island chain.", tones: ["Tense", "Human", "Salt-worn"], status: "Round open · Fictional demo", demoBallots: "876 fictional ballots", posterClass: "tide", posterMark: "TH" },
-  { title: "After the Ovation", genre: "Drama / Magical Realism", logline: "A retiring stagehand learns each final curtain can alter one choice from the past.", tones: ["Intimate", "Hopeful", "Theatrical"], status: "Voting preview · Fictional demo", demoBallots: "642 fictional ballots", posterClass: "ovation", posterMark: "AO" },
-];
-
-export const ballotGroups = [
-  ["Lead character", "A guarded mapmaker", "A relentless archivist"],
-  ["Setting", "A city after midnight", "An island ferry terminal"],
-  ["Central conflict", "Protect the truth", "Expose the disappearance"],
-  ["Relationship direction", "Former friends reunite", "Siblings learn to trust"],
-  ["Ending style", "Bittersweet revelation", "Earned hopeful turn"],
-];
-
-export const resultOptions = [
-  ["The city after midnight", 58],
-  ["A vanished coastal station", 27],
-  ["A theater between seasons", 15],
-] as const;
+/** All seeded content is fictional demonstration material. */
+export type BallotOption={id:string;label:string;description:string};
+export type BallotQuestion={id:string;category:string;prompt:string;explanation:string;required:boolean;type:"single"|"multiple";options:BallotOption[]};
+export type MovieConcept={id:string;title:string;genre:string;logline:string;synopsis:string;tones:string[];contentRating:string;status:string;demoBallots:string;posterClass:string;posterMark:string;ballotQuestions:BallotQuestion[]};
+export type BallotAnswer=Record<string,string[]>;
+export type DemoBallot={id:string;conceptId:string;answers:BallotAnswer;submittedAt:string;mode:"fictional-demo"};
+const q=(id:string,category:string,prompt:string,options:[string,string,string][]):BallotQuestion=>({id,category,prompt,explanation:"Choose the direction that best serves this fictional premise.",required:true,type:"single",options:options.map(([id,label,description])=>({id,label,description}))});
+const archive=[q("lead","Lead character","Who leads the search?",[["mapmaker","A guarded mapmaker","Knows the city by instinct."],["archivist","A relentless archivist","Trusts evidence over memory."]]),q("setting","Primary setting","Where does the mystery tighten?",[["midnight-city","The city after midnight","Its streets shift with forgotten names."],["sealed-stacks","The sealed municipal stacks","A hidden archive below the river."]]),q("conflict","Central conflict","What must be protected?",[["truth","The truth of a vanished memory","Even if it changes both lives."],["city","The city from a dangerous map","Before it redraws someone out."]]),q("relationship","Relationship direction","How do they change together?",[["former-friends","Former friends reconnect","Trust returns one clue at a time."],["new-allies","Uneasy new allies","They earn trust under pressure."]]),q("ending","Ending style","What feeling closes the story?",[["hopeful","An earned hopeful reveal","A loss becomes a new beginning."],["bittersweet","A bittersweet restoration","Truth arrives with a cost."]])];
+const tide=[q("lead","Lead character","Who takes the crossing?",[["navigator","A disgraced ferry navigator","She knows every dangerous channel."],["diver","A volunteer rescue diver","He cannot leave the missing behind."]]),q("setting","Primary setting","Where does the pursuit peak?",[["terminal","A storm-dark ferry terminal","Every departure board tells a lie."],["lighthouse","An abandoned lighthouse","Its beacon has begun signaling again."]]),q("conflict","Central conflict","What threatens the siblings?",[["expose","Expose the disappearance","Even if it fractures the island."],["protect","Protect a family secret","Before it sinks the rescue."]]),q("turn","Major turning point","What changes the chase?",[["recording","A last radio recording surfaces","It contradicts the official story."],["crossing","The missing ferry returns","But nobody aboard remembers leaving."]]),q("ending","Ending style","What is the final tide?",[["reunion","A difficult reunion","Truth makes repair possible."],["reckoning","A public reckoning","The island chooses accountability."]])];
+const ovation=[q("lead","Lead character","Who carries the final show?",[["stagehand","A retiring stagehand","He knows every hidden passage."],["understudy","A fearless understudy","She sees the theatre anew."]]),q("setting","Primary setting","Where does magic gather?",[["empty-theatre","An empty theatre after closing","The seats remember every audience."],["backstage","The labyrinth backstage","Old props open old doors."]]),q("tone","Tone","What emotional register leads?",[["warm","Warm and wistful","A gentle farewell to a life in theatre."],["playful","Playful and surreal","Reality changes with each curtain call."]]),q("conflict","Central conflict","What choice is unavoidable?",[["past","Restore one lost moment","But risk losing the present."],["future","Give the theatre a future","But leave the past untouched."]]),q("ending","Ending style","How does the curtain fall?",[["quiet","A quiet, human curtain call","One choice is accepted with grace."],["transformative","A transformative final bow","The next generation takes the stage."]])];
+export const movieConcepts:MovieConcept[]=[{id:"luminous-archive",title:"The Luminous Archive",genre:"Mystery / Science Fiction",logline:"A night archivist finds a city map that redraws itself around forgotten memories.",synopsis:"When an impossible map erases a shared memory, two former friends cross a midnight city to recover what was taken.",tones:["Atmospheric","Tender","Uncanny"],contentRating:"Fictional PG-13 concept",status:"Round open · Fictional demo",demoBallots:"1,248 fictional ballots",posterClass:"archive",posterMark:"LA",ballotQuestions:archive},{id:"low-tide",title:"Low Tide, High Wire",genre:"Coastal Thriller",logline:"Two estranged siblings trace a missing ferry across a storm-struck island chain.",synopsis:"A vanished ferry forces two siblings to confront the secret that divided their community.",tones:["Tense","Human","Salt-worn"],contentRating:"Fictional PG-13 concept",status:"Round open · Fictional demo",demoBallots:"876 fictional ballots",posterClass:"tide",posterMark:"TH",ballotQuestions:tide},{id:"after-ovation",title:"After the Ovation",genre:"Drama / Magical Realism",logline:"A retiring stagehand learns each final curtain can alter one choice from the past.",synopsis:"On the last night of an old theatre, a stagehand must decide what memory deserves one final performance.",tones:["Intimate","Hopeful","Theatrical"],contentRating:"Fictional PG concept",status:"Voting preview · Fictional demo",demoBallots:"642 fictional ballots",posterClass:"ovation",posterMark:"AO",ballotQuestions:ovation}];
+export const resultOptions=[["The city after midnight",58],["A vanished coastal station",27],["A theater between seasons",15]] as const;
+export const ballotGroups:[[string,string,string],...[string,string,string][]]=[["Lead character","A guarded mapmaker","A relentless archivist"],["Setting","A city after midnight","An island ferry terminal"],["Central conflict","Protect the truth","Expose the disappearance"],["Relationship direction","Former friends reunite","Siblings learn to trust"],["Ending style","Bittersweet revelation","Earned hopeful turn"]];
