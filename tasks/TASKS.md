@@ -2,7 +2,7 @@
 
 ## Status convention
 
-Only Phase 0 is complete. All later phases are planned and must be validated
+Phases 0 and 1 are complete. All later phases are planned and must be validated
 before their status is changed or this file is updated.
 
 ## Phase 0 — Documentation and repository foundation — Completed
@@ -22,7 +22,7 @@ and phased plan are documented.
 application source files, package installation, voting implementation, or Gemini
 implementation were introduced.
 
-## Phase 1 — Next.js scaffold — Planned
+## Phase 1 — Next.js scaffold — Completed
 
 **Scope:** Create a strict TypeScript Next.js App Router foundation with
 Tailwind CSS and baseline quality tooling.
@@ -32,7 +32,12 @@ server-only configuration boundaries.
 
 **Acceptance criteria:** The app builds and has no exposed secret configuration.
 
-**Validation:** Run lint, tests, type checking, and build.
+**Validation:** Passed on 2026-07-27.
+
+- `npm install` — passed; installed the locked scaffold dependencies.
+- `npm.cmd run lint` — passed with no ESLint findings.
+- `npm.cmd run typecheck` — passed (`tsc --noEmit`).
+- `npm.cmd run build` — passed; Next.js production build completed successfully.
 
 ## Phase 2 — Static cinematic interface — Planned
 
