@@ -2,7 +2,7 @@
 
 ## Status convention
 
-Phases 0, 1, and 2 are complete. All later phases are planned and must be validated
+Phases 0, 1, 2, and 3 are complete. All later phases are planned and must be validated
 before their status is changed or this file is updated.
 
 ## Phase 0 — Documentation and repository foundation — Completed
@@ -56,7 +56,7 @@ all demo content as fictional.
 - `npm.cmd run build` — passed; the static routes compiled and prerendered successfully.
 - Visual browser review could not run because no browser surface was available in the environment.
 
-## Phase 3 — Fictional movie concepts and ballot form — Planned
+## Phase 3 — Fictional movie concepts and ballot form — Completed
 
 **Scope:** Add three fictional concepts and a validated curated ballot form.
 
@@ -66,7 +66,12 @@ genre blend, tone, conflict, relationship, major event, and ending style.
 **Acceptance criteria:** A ballot captures all choices for one round and rejects
 invalid external input.
 
-**Validation:** Run lint, tests, type checking, build, and form-validation tests.
+**Validation:** Passed on 2026-07-27.
+
+- `npm.cmd run lint` — passed.
+- `npm.cmd run test` — passed; 4 focused ballot-logic tests passed.
+- `npm.cmd run typecheck` — passed (`tsc --noEmit`).
+- `npm.cmd run build` — passed; production build completed successfully.
 
 ## Phase 4 — Vote calculation and anonymous session limits — Planned
 
