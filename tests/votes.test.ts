@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { movieConcepts } from "../src/data/demo-data";
+import { aggregateVotes, resetVoteStoreForTests, roundPercentage, submitVote, VoteValidationError } from "../src/lib/votes";
+const first = movieConcepts[0]; const answers = Object.fromEntries(first.ballotQuestions.map((question) => [question.id, [question.options[0].id]]));
+const session = "session-abcdefghijklmnop";
+test("valid submission and aggregation", () => { resetVoteStoreForTests(); const result = submitVote(first.id, answers, session); assert.equal(result.status, "submitted"); assert.equal(result.aggregate.totalSubmissions, 1); assert.equal(result.aggregate.counts[first.ballotQuestions[0].options[0].id], 1); });
+test("invalid movie and option IDs are rejected", () => { resetVoteStoreForTests(); assert.throws(() => submitVote("missing", answers, session), VoteValidationError); const bad = { ...answers, lead: ["missing"] }; assert.throws(() => submitVote(first.id, bad, session), VoteValidationError); });
+test("incomplete answers are rejected", () => { resetVoteStoreForTests(); assert.throws(() => submitVote(first.id, { lead: answers.lead }, session), VoteValidationError); });
+test("duplicate session and movie is rejected while a different movie is allowed", () => { resetVoteStoreForTests(); submitVote(first.id, answers, session); assert.equal(submitVote(first.id, answers, session).status, "duplicate"); const other = movieConcepts[1]; const otherAnswers = Object.fromEntries(other.ballotQuestions.map((question) => [question.id, [question.options[0].id]])); assert.equal(submitVote(other.id, otherAnswers, session).status, "submitted"); });
+test("zero votes and percentage rounding are stable", () => { resetVoteStoreForTests(); assert.equal(aggregateVotes(first.id).totalSubmissions, 0); assert.equal(Object.values(aggregateVotes(first.id).percentages)[0], 0); assert.equal(roundPercentage(33.333), 33.3); });

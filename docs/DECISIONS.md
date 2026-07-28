@@ -21,6 +21,10 @@
   for focused decisions. This route uses only local client state, confirms before
   clearing an in-progress cut on exit, and keeps responsive decision navigation
   separate from unrelated homepage content.
+- Phase 4A trusts only validated `POST /api/votes` submissions and keeps local
+  development persistence behind an in-memory repository. Duplicate prevention
+  is keyed by anonymous session and movie; fictional seeded counts never merge
+  with prototype submission aggregates.
 
 ## Provisional decisions
 

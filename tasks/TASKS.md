@@ -107,6 +107,15 @@ local choices on exit.
 
 ## Phase 4 — Vote calculation and anonymous session limits — Planned
 
+### Phase 4A — Deterministic vote calculation and anonymous session limits — Completed
+
+Implemented validated server submission, in-memory repository abstraction,
+one-submission-per-session-per-movie duplicate prevention, trusted aggregation,
+and focused tests. The repository resets on server restart; durable storage is
+deferred to Phase 9.
+
+**Validation:** Passed on 2026-07-28: lint, 9 tests, typecheck, and build.
+
 **Scope:** Add server-enforced one-ballot-per-session-per-round behavior.
 
 **Tasks:** Implement secure anonymous session handling, deterministic ballot

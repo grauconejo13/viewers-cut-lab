@@ -8,7 +8,9 @@ The prototype separates its homepage film-world discovery from the local,
 client-memory-only story route at `/story/[movieId]`. The route is intentionally
 framed as entering an unfinished movie and shaping a personal cut. Refreshing or
 exiting clears its choices; no real vote, persistence, or duplicate prevention
-exists yet. All concepts and counts are fictional demo data.
+exists yet. Phase 4A adds trusted anonymous prototype submissions through a
+server route; its in-memory store resets when the server restarts and is kept
+separate from all fictional demo counts.
 
 ## Planned stack
 

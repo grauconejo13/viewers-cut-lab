@@ -25,6 +25,11 @@ story route (`/story/[movieId]`). The route parameter selects an existing
 fictional concept; its answers remain in component memory and are intentionally
 lost on refresh or confirmed exit.
 
+Phase 4A adds `POST /api/votes` and an in-memory vote repository. The route
+validates movie, question, option, and anonymous session identifiers before
+writing; durable Firestore storage replaces this repository in the later
+persistence milestone.
+
 - Keep Gemini calls on the server.
 - Treat AI as an interpretation layer, not a source of truth for ballot validity.
 - Use deterministic logic before AI interpretation whenever possible.

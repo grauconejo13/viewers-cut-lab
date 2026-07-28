@@ -16,6 +16,10 @@ The homepage introduces the film worlds and product context. Selecting a concept
 opens `/story/[movieId]`, where one story decision is shown at a time. Exiting a
 story with choices requires confirmation and clears only local prototype state.
 
+Completed cuts submit to the trusted server boundary once per anonymous session
+and movie. Server aggregation returns counts and stable one-decimal percentages;
+these prototype results are visibly separate from fictional seeded demo counts.
+
 ## Core workflow
 
 1. A creator defines a fictional movie premise and a set of curated choices.
