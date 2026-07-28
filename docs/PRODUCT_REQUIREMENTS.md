@@ -4,6 +4,14 @@
 
 Viewers Cut Lab is a fictional, audience-driven movie development experiment. The experience should feel like a controlled lab for collaborative story exploration, where voting signals are treated as creative input rather than a guarantee of outcome.
 
+## Audience experience framing
+
+The public opening experience frames participation as entering an unfinished story:
+enter a film world, make one story decision at a time, review a personal cut,
+and then learn about the later product workflow. Audience-facing language should
+prefer story decisions and "Your Cut" over survey terminology. The local Phase 3
+implementation remains fictional, client-memory-only demonstration state.
+
 ## Core workflow
 
 1. A creator defines a fictional movie premise and a set of curated choices.

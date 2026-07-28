@@ -73,6 +73,22 @@ invalid external input.
 - `npm.cmd run typecheck` — passed (`tsc --noEmit`).
 - `npm.cmd run build` — passed; production build completed successfully.
 
+## Phase 3 UX refinement — Interactive story opening — Completed
+
+**Scope:** Reframe the local Phase 3 audience journey as entering an unfinished
+movie and shaping a personal cut, without adding backend, AI, or persistence work.
+
+**Tasks:** Add cinematic opening language, film-world invitations, one-at-a-time
+story decisions with scene setup, honest fictional completion copy, and preserve
+the existing local validation, review, reset, and accessibility behavior.
+
+**Validation:** Passed on 2026-07-28.
+
+- `npm run lint` — passed.
+- `npm run test` — passed; 4 focused ballot-logic tests passed.
+- `npm run typecheck` — passed (`tsc --noEmit`).
+- `npm run build` — passed; production build completed successfully.
+
 ## Phase 4 — Vote calculation and anonymous session limits — Planned
 
 **Scope:** Add server-enforced one-ballot-per-session-per-round behavior.

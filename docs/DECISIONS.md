@@ -13,6 +13,10 @@
 - Creator approval is required before screenplay scene generation.
 - The MVP contains fictional demonstration content only and makes no claims of
   real demand, votes, testimonials, or production outcomes.
+- Phase 3 received a UX refinement: the opening audience journey is framed as
+  an interactive unfinished movie, with narrative scene context and one story
+  decision at a time, while retaining the existing local-only validation,
+  review, reset, and accessibility behavior.
 
 ## Provisional decisions
 
