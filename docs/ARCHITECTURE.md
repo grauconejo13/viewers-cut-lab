@@ -20,6 +20,11 @@ The initial implementation should be a lightweight product prototype with a Next
 
 The current ballot flow is a client-memory prototype. A future server-side voting milestone will replace it with authoritative persistence and duplicate prevention.
 
+The audience UI is split between the static homepage route (`/`) and the focused
+story route (`/story/[movieId]`). The route parameter selects an existing
+fictional concept; its answers remain in component memory and are intentionally
+lost on refresh or confirmed exit.
+
 - Keep Gemini calls on the server.
 - Treat AI as an interpretation layer, not a source of truth for ballot validity.
 - Use deterministic logic before AI interpretation whenever possible.

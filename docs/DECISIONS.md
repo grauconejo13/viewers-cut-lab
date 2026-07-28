@@ -17,6 +17,10 @@
   an interactive unfinished movie, with narrative scene context and one story
   decision at a time, while retaining the existing local-only validation,
   review, reset, and accessibility behavior.
+- The audience experience is split into homepage discovery and `/story/[movieId]`
+  for focused decisions. This route uses only local client state, confirms before
+  clearing an in-progress cut on exit, and keeps responsive decision navigation
+  separate from unrelated homepage content.
 
 ## Provisional decisions
 

@@ -12,6 +12,10 @@ and then learn about the later product workflow. Audience-facing language should
 prefer story decisions and "Your Cut" over survey terminology. The local Phase 3
 implementation remains fictional, client-memory-only demonstration state.
 
+The homepage introduces the film worlds and product context. Selecting a concept
+opens `/story/[movieId]`, where one story decision is shown at a time. Exiting a
+story with choices requires confirmation and clears only local prototype state.
+
 ## Core workflow
 
 1. A creator defines a fictional movie premise and a set of curated choices.

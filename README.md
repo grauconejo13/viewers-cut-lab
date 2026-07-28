@@ -4,7 +4,11 @@ Viewers Cut Lab is an audience-driven movie development platform concept. It exp
 
 ## Current status
 
-The prototype includes a local, client-memory-only fictional story-decision flow. It is intentionally framed as entering an unfinished movie and shaping a personal cut, rather than completing a survey. Refreshing clears it; no real vote, persistence, or duplicate prevention exists yet. All concepts and counts are fictional demo data.
+The prototype separates its homepage film-world discovery from the local,
+client-memory-only story route at `/story/[movieId]`. The route is intentionally
+framed as entering an unfinished movie and shaping a personal cut. Refreshing or
+exiting clears its choices; no real vote, persistence, or duplicate prevention
+exists yet. All concepts and counts are fictional demo data.
 
 ## Planned stack
 

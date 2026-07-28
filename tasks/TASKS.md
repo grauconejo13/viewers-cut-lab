@@ -89,6 +89,22 @@ the existing local validation, review, reset, and accessibility behavior.
 - `npm run typecheck` — passed (`tsc --noEmit`).
 - `npm run build` — passed; production build completed successfully.
 
+## Phase 3 UX architecture refinement — Dedicated story route — Completed
+
+**Scope:** Separate homepage film-world discovery from the local interactive
+story route without adding persistence, sessions, backend behavior, or AI.
+
+**Tasks:** Route concept entry to `/story/[movieId]`, show one responsive story
+decision at a time, support review and completion, and confirm before clearing
+local choices on exit.
+
+**Validation:** Passed on 2026-07-28.
+
+- `npm run lint` — passed.
+- `npm run test` — passed; 4 focused ballot-logic tests passed.
+- `npm run typecheck` — passed (`tsc --noEmit`).
+- `npm run build` — passed; the story route compiled successfully.
+
 ## Phase 4 — Vote calculation and anonymous session limits — Planned
 
 **Scope:** Add server-enforced one-ballot-per-session-per-round behavior.
