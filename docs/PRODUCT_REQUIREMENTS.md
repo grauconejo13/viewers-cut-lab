@@ -37,6 +37,8 @@ The first lab MVP should prove that:
 
 ## Functional requirements
 
+Current Phase 3 ballots are local demonstration state only. They are not recorded as real votes, are cleared on refresh, and have no persistence or duplicate prevention yet.
+
 - Present three clearly fictional movie concepts.
 - Support one anonymous ballot per session per round for the prototype.
 - Show vote totals and percentages.

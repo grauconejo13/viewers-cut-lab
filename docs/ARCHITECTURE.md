@@ -18,6 +18,8 @@ The initial implementation should be a lightweight product prototype with a Next
 
 ## Architectural principles
 
+The current ballot flow is a client-memory prototype. A future server-side voting milestone will replace it with authoritative persistence and duplicate prevention.
+
 - Keep Gemini calls on the server.
 - Treat AI as an interpretation layer, not a source of truth for ballot validity.
 - Use deterministic logic before AI interpretation whenever possible.

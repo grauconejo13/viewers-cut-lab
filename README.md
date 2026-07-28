@@ -4,7 +4,7 @@ Viewers Cut Lab is an audience-driven movie development platform concept. It exp
 
 ## Current status
 
-This repository currently contains the planning and documentation foundation for the first lab MVP. No Next.js scaffold, package installation, Gemini implementation, voting system implementation, or source-code application files have been created yet.
+The prototype includes a local, client-memory-only fictional ballot flow. Refreshing clears it; no real vote, persistence, or duplicate prevention exists yet. All concepts and counts are fictional demo data.
 
 ## Planned stack
 
