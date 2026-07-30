@@ -1,33 +1,11 @@
+import { createHash } from "node:crypto";
+import { Firestore, FieldValue } from "@google-cloud/firestore";
 import { movieConcepts, type BallotAnswer } from "@/data/demo-data";
-
-export type VoteAggregate = { movieId: string; totalSubmissions: number; counts: Record<string, number>; percentages: Record<string, number> };
-type VoteSubmission = { movieId: string; sessionId: string; answers: BallotAnswer };
-type Store = { submissions: VoteSubmission[] };
-const globalStore = globalThis as typeof globalThis & { viewersCutVoteStore?: Store };
-const store = globalStore.viewersCutVoteStore ?? (globalStore.viewersCutVoteStore = { submissions: [] });
-
-export class VoteValidationError extends Error {}
-
-const optionIds = (movieId: string) => movieConcepts.find((concept) => concept.id === movieId)?.ballotQuestions.flatMap((question) => question.options.map((option) => option.id)) ?? [];
-export const roundPercentage = (value: number) => Math.round(value * 10) / 10;
-export function aggregateVotes(movieId: string, submissions = store.submissions): VoteAggregate {
-  const counts = Object.fromEntries(optionIds(movieId).map((id) => [id, 0]));
-  const matching = submissions.filter((submission) => submission.movieId === movieId);
-  matching.forEach((submission) => Object.values(submission.answers).forEach(([optionId]) => { counts[optionId] += 1; }));
-  const totalSubmissions = matching.length;
-  const percentages = Object.fromEntries(Object.entries(counts).map(([optionId, count]) => [optionId, totalSubmissions ? roundPercentage((count / totalSubmissions) * 100) : 0]));
-  return { movieId, totalSubmissions, counts, percentages };
-}
-export function submitVote(movieId: unknown, answers: unknown, sessionId: unknown) {
-  if (typeof movieId !== "string" || typeof sessionId !== "string" || !/^[a-zA-Z0-9_-]{16,128}$/.test(sessionId) || !answers || typeof answers !== "object" || Array.isArray(answers)) throw new VoteValidationError("Invalid submission.");
-  const concept = movieConcepts.find((item) => item.id === movieId);
-  if (!concept) throw new VoteValidationError("Unknown movie ID.");
-  const received = answers as BallotAnswer;
-  const expectedIds = new Set(concept.ballotQuestions.map((question) => question.id));
-  if (Object.keys(received).length !== expectedIds.size || Object.keys(received).some((id) => !expectedIds.has(id))) throw new VoteValidationError("Complete answers are required.");
-  for (const question of concept.ballotQuestions) { const selected = received[question.id]; if (!Array.isArray(selected) || selected.length !== 1 || typeof selected[0] !== "string" || !question.options.some((option) => option.id === selected[0])) throw new VoteValidationError("Invalid option ID."); }
-  if (store.submissions.some((item) => item.movieId === movieId && item.sessionId === sessionId)) return { status: "duplicate" as const, aggregate: aggregateVotes(movieId) };
-  store.submissions.push({ movieId, sessionId, answers: structuredClone(received) });
-  return { status: "submitted" as const, aggregate: aggregateVotes(movieId) };
-}
-export function resetVoteStoreForTests() { store.submissions.length = 0; }
+export type VoteAggregate={movieId:string;totalSubmissions:number;counts:Record<string,number>;percentages:Record<string,number>}; export class VoteValidationError extends Error{};export class VoteStoreError extends Error{};
+const ids=(movieId:string)=>movieConcepts.find(c=>c.id===movieId)?.ballotQuestions.flatMap(q=>q.options.map(o=>o.id))??[];export const roundPercentage=(n:number)=>Math.round(n*10)/10;export const hashSession=(session:string,secret:string,movieId:string)=>createHash("sha256").update(`${secret}:${movieId}:${session}`).digest("hex");
+export function validateVote(movieId:unknown,answers:unknown,sessionId:unknown){if(typeof movieId!=="string"||typeof sessionId!=="string"||!/^[a-zA-Z0-9_-]{16,128}$/.test(sessionId)||!answers||typeof answers!=="object"||Array.isArray(answers))throw new VoteValidationError("Invalid submission.");const concept=movieConcepts.find(c=>c.id===movieId);if(!concept)throw new VoteValidationError("Unknown movie ID.");const a=answers as BallotAnswer;if(Object.keys(a).length!==concept.ballotQuestions.length)throw new VoteValidationError("Complete answers are required.");for(const q of concept.ballotQuestions){if(!Array.isArray(a[q.id])||a[q.id].length!==1||!q.options.some(o=>o.id===a[q.id][0]))throw new VoteValidationError("Invalid option ID.")}return{movieId,answers:a,sessionId}}
+export interface VoteRepository{submit(movieId:string,answers:BallotAnswer,sessionHash:string):Promise<{status:"submitted"|"duplicate";aggregate:VoteAggregate}>}
+const aggregate=(movieId:string,total:number,counts:Record<string,number>):VoteAggregate=>({movieId,totalSubmissions:total,counts,percentages:Object.fromEntries(Object.entries(counts).map(([id,n])=>[id,total?roundPercentage(n/total*100):0]))});
+export class MemoryVoteRepository implements VoteRepository{items:{movieId:string;hash:string;answers:BallotAnswer}[]=[];async submit(movieId:string,answers:BallotAnswer,sessionHash:string){if(this.items.some(i=>i.movieId===movieId&&i.hash===sessionHash))return{status:"duplicate" as const,aggregate:this.get(movieId)};this.items.push({movieId,hash:sessionHash,answers:structuredClone(answers)});return{status:"submitted" as const,aggregate:this.get(movieId)}}get(movieId:string){const counts=Object.fromEntries(ids(movieId).map(id=>[id,0]));const matching=this.items.filter(i=>i.movieId===movieId);matching.forEach(i=>Object.values(i.answers).forEach(([id])=>counts[id]++));return aggregate(movieId,matching.length,counts)}}
+export class FirestoreVoteRepository implements VoteRepository{constructor(private db:Firestore){}async submit(movieId:string,answers:BallotAnswer,sessionHash:string){const vote=this.db.doc(`prototypeVotes/${movieId}/submissions/${sessionHash}`),summary=this.db.doc(`prototypeVotes/${movieId}`);return this.db.runTransaction(async tx=>{if((await tx.get(vote)).exists){const data=(await tx.get(summary)).data()??{};return{status:"duplicate" as const,aggregate:aggregate(movieId,data.totalSubmissions??0,data.counts??Object.fromEntries(ids(movieId).map(id=>[id,0])))};}const current=(await tx.get(summary)).data()??{totalSubmissions:0,counts:Object.fromEntries(ids(movieId).map(id=>[id,0]))};const counts={...current.counts} as Record<string,number>;Object.values(answers).forEach(([id])=>counts[id]=(counts[id]??0)+1);tx.set(vote,{movieId,sessionHash,optionIds:Object.values(answers).map(([id])=>id),createdAt:FieldValue.serverTimestamp()});tx.set(summary,{movieId,totalSubmissions:(current.totalSubmissions??0)+1,counts,updatedAt:FieldValue.serverTimestamp()});return{status:"submitted" as const,aggregate:aggregate(movieId,(current.totalSubmissions??0)+1,counts)}})}}
+export function firestoreRepositoryFromEnv(){const projectId=process.env.FIRESTORE_PROJECT_ID,secret=process.env.VOTE_SESSION_HASH_SECRET;if(!projectId||!secret)throw new VoteStoreError("Firestore is not configured.");const db=new Firestore({projectId,host:process.env.FIRESTORE_EMULATOR_HOST,ssl:!process.env.FIRESTORE_EMULATOR_HOST});return{repository:new FirestoreVoteRepository(db),secret}}
