@@ -25,11 +25,11 @@ server restart; Phase 9 replaces it with durable cloud storage.
 
 ## Deterministic status model
 
-| Status | Meaning | Action |
-| --- | --- | --- |
-| Trusted | Passed defined integrity rules | Include in percentages and AI input |
-| Held | Needs review or a later rule decision | Exclude from trusted percentages |
-| Rejected | Violates a deterministic rule | Exclude from valid totals |
+| Status   | Meaning                               | Action                              |
+| -------- | ------------------------------------- | ----------------------------------- |
+| Trusted  | Passed defined integrity rules        | Include in percentages and AI input |
+| Held     | Needs review or a later rule decision | Exclude from trusted percentages    |
+| Rejected | Violates a deterministic rule         | Exclude from valid totals           |
 
 The Vote Integrity Service performs deterministic duplicate, rate, and
 suspicious-pattern checks. Gemini may summarize aggregate patterns, but never

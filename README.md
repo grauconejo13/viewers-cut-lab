@@ -33,6 +33,7 @@ separate from all fictional demo counts.
 ## First MVP definition
 
 The first lab MVP includes:
+
 - three clearly fictional movie concepts
 - one anonymous ballot per session per round
 - several curated story choices

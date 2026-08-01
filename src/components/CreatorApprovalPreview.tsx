@@ -1,1 +1,43 @@
-export function CreatorApprovalPreview() { return <section className="section studio" id="creator-studio" aria-labelledby="studio-title"><div className="section-heading"><p className="eyebrow">Creator studio preview</p><h2 id="studio-title">The final creative decision is the creator&apos;s.</h2></div><div className="approval-panel"><div><p className="panel-kicker">Proposed story direction · Fictional example</p><h3>A mapmaker and an archivist follow the city&apos;s changing streets to recover a memory erased from both their lives.</h3><p>Audience signals lean toward an intimate midnight mystery with a hopeful final reveal.</p></div><div className="approval-actions"><button type="button" className="button">Accept</button><button type="button" className="button button-quiet">Request Changes</button><button type="button" className="button button-danger">Reject</button><small>Preview controls only. No backend action is connected.</small></div></div></section>; }
+export function CreatorApprovalPreview() {
+  return (
+    <section
+      className="section studio"
+      id="creator-studio"
+      aria-labelledby="studio-title"
+    >
+      <div className="section-heading">
+        <p className="eyebrow">Creator studio preview</p>
+        <h2 id="studio-title">
+          The final creative decision is the creator&apos;s.
+        </h2>
+      </div>
+      <div className="approval-panel">
+        <div>
+          <p className="panel-kicker">
+            Proposed story direction · Fictional example
+          </p>
+          <h3>
+            A mapmaker and an archivist follow the city&apos;s changing streets
+            to recover a memory erased from both their lives.
+          </h3>
+          <p>
+            Audience signals lean toward an intimate midnight mystery with a
+            hopeful final reveal.
+          </p>
+        </div>
+        <div className="approval-actions">
+          <button type="button" className="button">
+            Accept
+          </button>
+          <button type="button" className="button button-quiet">
+            Request Changes
+          </button>
+          <button type="button" className="button button-danger">
+            Reject
+          </button>
+          <small>Preview controls only. No backend action is connected.</small>
+        </div>
+      </div>
+    </section>
+  );
+}

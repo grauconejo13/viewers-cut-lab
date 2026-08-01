@@ -1,2 +1,39 @@
 import { resultOptions } from "@/data/demo-data";
-export function ResultsPreview() { return <section className="section results" id="results" aria-labelledby="results-title"><div className="section-heading"><p className="eyebrow">Demo results · fictional ballots</p><h2 id="results-title">Signals, not a mandate.</h2><p>Static fictional results for The Luminous Archive. Not real audience demand.</p></div><div className="results-card"><p className="results-label">Preferred setting</p>{resultOptions.map(([label, value]) => <div className="result-row" key={label}><div><span>{label}</span><strong>{value}%</strong></div><div className="bar" aria-label={`${label}: ${value} percent, fictional demo result`}><i style={{ width: `${value}%` }} /></div></div>)}<p className="demo-note">DEMO RESULTS · 1,248 fictional ballots · Not real audience demand</p></div></section>; }
+export function ResultsPreview() {
+  return (
+    <section
+      className="section results"
+      id="results"
+      aria-labelledby="results-title"
+    >
+      <div className="section-heading">
+        <p className="eyebrow">Demo results · fictional ballots</p>
+        <h2 id="results-title">Signals, not a mandate.</h2>
+        <p>
+          Static fictional results for The Luminous Archive. Not real audience
+          demand.
+        </p>
+      </div>
+      <div className="results-card">
+        <p className="results-label">Preferred setting</p>
+        {resultOptions.map(([label, value]) => (
+          <div className="result-row" key={label}>
+            <div>
+              <span>{label}</span>
+              <strong>{value}%</strong>
+            </div>
+            <div
+              className="bar"
+              aria-label={`${label}: ${value} percent, fictional demo result`}
+            >
+              <i style={{ width: `${value}%` }} />
+            </div>
+          </div>
+        ))}
+        <p className="demo-note">
+          DEMO RESULTS · 1,248 fictional ballots · Not real audience demand
+        </p>
+      </div>
+    </section>
+  );
+}

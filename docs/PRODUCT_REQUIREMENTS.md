@@ -45,6 +45,7 @@ these prototype results are visibly separate from fictional seeded demo counts.
 ## MVP goals
 
 The first lab MVP should prove that:
+
 - a fictional movie premise can be presented clearly
 - viewers can participate in a simple ballot flow
 - aggregate audience signals can be converted into a story brief
@@ -66,6 +67,7 @@ Current Phase 3 ballots are local demonstration state only. They are not recorde
 ## Explicit exclusions for the first MVP
 
 The first MVP must not include:
+
 - public creator marketplace
 - real reviews of released films
 - payments

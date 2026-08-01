@@ -1,2 +1,31 @@
-const steps = ["Audience choices are gathered as fictional prototype input", "The creative team reviews the signals", "A creator keeps the final decision", "Later workflow previews remain explanatory only"];
-export function WorkflowSteps() { return <section className="section workflow" id="how-it-works" aria-labelledby="workflow-title"><div className="section-heading"><p className="eyebrow">What happens behind the scenes</p><h2 id="workflow-title">The story stays in human hands.</h2><p>These are product-context previews, not active production workflow.</p></div><ol>{steps.map((step, index) => <li key={step}><span>{String(index + 1).padStart(2, "0")}</span><p>{step}</p></li>)}</ol></section>; }
+const steps = [
+  "Audience choices are gathered as fictional prototype input",
+  "The creative team reviews the signals",
+  "A creator keeps the final decision",
+  "Later workflow previews remain explanatory only",
+];
+export function WorkflowSteps() {
+  return (
+    <section
+      className="section workflow"
+      id="how-it-works"
+      aria-labelledby="workflow-title"
+    >
+      <div className="section-heading">
+        <p className="eyebrow">What happens behind the scenes</p>
+        <h2 id="workflow-title">The story stays in human hands.</h2>
+        <p>
+          These are product-context previews, not active production workflow.
+        </p>
+      </div>
+      <ol>
+        {steps.map((step, index) => (
+          <li key={step}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <p>{step}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}

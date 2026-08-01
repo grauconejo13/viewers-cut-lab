@@ -7,6 +7,7 @@ This repository is the planning and documentation foundation for Viewers Cut Lab
 ## Required reading before editing
 
 Before making any change, read:
+
 - README.md
 - docs/
 - tasks/TASKS.md
