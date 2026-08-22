@@ -2,232 +2,125 @@
 
 ## Status convention
 
-Phases 0, 1, 2, and 3 are complete. All later phases are planned and must be validated
-before their status is changed or this file is updated.
+Phases 0 through 4B are complete. Phase 5A and later work remain planned and must be explicitly implemented and validated before their status changes.
 
 ## Phase 0 — Documentation and repository foundation — Completed
 
-**Scope:** Establish the product definition, technical direction, safeguards,
-workflow boundaries, roadmap, and implementation plan.
+**Scope:** Establish the product definition, technical direction, safeguards, workflow boundaries, roadmap, and implementation plan.
 
-**Tasks:** Create the required README, agent guidance, product, architecture,
-AI workflow, voting integrity, continuity, security, decision, roadmap, task,
-and backlog documentation.
-
-**Acceptance criteria:** The project is clearly defined as a fictional lab MVP;
-the stack, workflow, approval gate, voting model, AI boundaries, exclusions,
-and phased plan are documented.
-
-**Validation:** Review all documents for internal consistency; confirm that no
-application source files, package installation, voting implementation, or Gemini
-implementation were introduced.
+**Acceptance criteria:** The project is clearly defined as a fictional lab MVP; the stack, workflow, approval gate, voting model, AI boundaries, exclusions, and phased plan are documented.
 
 ## Phase 1 — Next.js scaffold — Completed
 
-**Scope:** Create a strict TypeScript Next.js App Router foundation with
-Tailwind CSS and baseline quality tooling.
+Strict TypeScript Next.js App Router foundation with Tailwind CSS and baseline quality tooling.
 
-**Tasks:** Scaffold the app, configure linting/type checking, and establish
-server-only configuration boundaries.
-
-**Acceptance criteria:** The app builds and has no exposed secret configuration.
-
-**Validation:** Passed on 2026-07-27.
-
-- `npm install` — passed; installed the locked scaffold dependencies.
-- `npm.cmd run lint` — passed with no ESLint findings.
-- `npm.cmd run typecheck` — passed (`tsc --noEmit`).
-- `npm.cmd run build` — passed; Next.js production build completed successfully.
+**Validation:** Passed on 2026-07-27: install, lint, typecheck, and production build.
 
 ## Phase 2 — Static cinematic interface — Completed
 
-**Scope:** Build static, accessible lab screens using clearly fictional content.
+Static, accessible fictional lab screens and clearly labeled demo content.
 
-**Tasks:** Create concept, voting, result, and creator-review presentation
-states without live logic.
-
-**Acceptance criteria:** The interface communicates the lab workflow and labels
-all demo content as fictional.
-
-**Validation:** Passed on 2026-07-27.
-
-- `npm.cmd run lint` — passed with no ESLint findings.
-- `npm.cmd run typecheck` — passed (`tsc --noEmit`).
-- `npm.cmd run build` — passed; the static routes compiled and prerendered successfully.
-- Visual browser review could not run because no browser surface was available in the environment.
+**Validation:** Passed on 2026-07-27: lint, typecheck, and production build.
 
 ## Phase 3 — Fictional movie concepts and ballot form — Completed
 
-**Scope:** Add three fictional concepts and a validated curated ballot form.
+Three fictional concepts and a validated curated story-decision form.
 
-**Tasks:** Model rounds and choices for lead/supporting character, setting,
-genre blend, tone, conflict, relationship, major event, and ending style.
-
-**Acceptance criteria:** A ballot captures all choices for one round and rejects
-invalid external input.
-
-**Validation:** Passed on 2026-07-27.
-
-- `npm.cmd run lint` — passed.
-- `npm.cmd run test` — passed; 4 focused ballot-logic tests passed.
-- `npm.cmd run typecheck` — passed (`tsc --noEmit`).
-- `npm.cmd run build` — passed; production build completed successfully.
+**Validation:** Passed on 2026-07-27: lint, 4 focused ballot tests, typecheck, and build.
 
 ## Phase 3 UX refinement — Interactive story opening — Completed
 
-**Scope:** Reframe the local Phase 3 audience journey as entering an unfinished
-movie and shaping a personal cut, without adding backend, AI, or persistence work.
+Reframed the audience journey as entering an unfinished movie and shaping a personal cut with one decision at a time.
 
-**Tasks:** Add cinematic opening language, film-world invitations, one-at-a-time
-story decisions with scene setup, honest fictional completion copy, and preserve
-the existing local validation, review, reset, and accessibility behavior.
-
-**Validation:** Passed on 2026-07-28.
-
-- `npm run lint` — passed.
-- `npm run test` — passed; 4 focused ballot-logic tests passed.
-- `npm run typecheck` — passed (`tsc --noEmit`).
-- `npm run build` — passed; production build completed successfully.
+**Validation:** Passed on 2026-07-28: lint, 4 tests, typecheck, and build.
 
 ## Phase 3 UX architecture refinement — Dedicated story route — Completed
 
-**Scope:** Separate homepage film-world discovery from the local interactive
-story route without adding persistence, sessions, backend behavior, or AI.
+Separated homepage film-world discovery from `/story/[movieId]` so the interactive flow remains focused and responsive.
 
-**Tasks:** Route concept entry to `/story/[movieId]`, show one responsive story
-decision at a time, support review and completion, and confirm before clearing
-local choices on exit.
+**Validation:** Passed on 2026-07-28: lint, 4 tests, typecheck, and build.
 
-**Validation:** Passed on 2026-07-28.
-
-- `npm run lint` — passed.
-- `npm run test` — passed; 4 focused ballot-logic tests passed.
-- `npm run typecheck` — passed (`tsc --noEmit`).
-- `npm run build` — passed; the story route compiled successfully.
-
-## Phase 4 — Vote calculation and anonymous session limits — Planned
+## Phase 4 — Trusted vote calculation and durable anonymous-session limits — Completed
 
 ### Phase 4A — Deterministic vote calculation and anonymous session limits — Completed
 
-Implemented validated server submission, in-memory repository abstraction,
-one-submission-per-session-per-movie duplicate prevention, trusted aggregation,
-and focused tests. The repository resets on server restart; durable storage is
-deferred to Phase 9.
+Implemented validated `POST /api/votes` submission, repository abstraction, one-submission-per-session-per-movie duplicate prevention, trusted aggregation, fictional-demo separation, and focused tests using an in-memory repository.
 
 **Validation:** Passed on 2026-07-28: lint, 9 tests, typecheck, and build.
 
-**Scope:** Add server-enforced one-ballot-per-session-per-round behavior.
+### Phase 4B — Firestore persistence and anonymous-session hashing — Completed
 
-**Tasks:** Implement secure anonymous session handling, deterministic ballot
-status rules, trusted aggregation, and clearly labeled demo data.
+**Scope:** Replace restart-sensitive vote persistence with Cloud Firestore while preserving deterministic validation and API behavior.
 
-**Acceptance criteria:** Duplicate prevention is server-enforced; raw and
-trusted counts differ when needed; percentages use trusted ballots.
+**Implemented:**
 
-**Validation:** Run lint, tests, type checking, build, and integrity scenarios.
+- Firestore-backed `VoteRepository` using `@google-cloud/firestore`.
+- `prototypeVotes/{movieId}` aggregate documents for trusted totals and option counts.
+- `prototypeVotes/{movieId}/submissions/{sessionHash}` submission documents for validated option IDs, movie ID, session hash, and server timestamp.
+- One Firestore transaction for duplicate detection, submission creation, and aggregate updates.
+- SHA-256 hashing of validated browser session IDs using `VOTE_SESSION_HASH_SECRET` and movie ID; raw session IDs are not persisted.
+- `FIRESTORE_PROJECT_ID`, optional `FIRESTORE_EMULATOR_HOST`, and `VOTE_SESSION_HASH_SECRET` environment configuration.
+- Firestore emulator support when configured.
+- Unit tests remain independent from a live Firestore project through `MemoryVoteRepository`.
+- API compatibility: `200` accepted, `409` duplicate, `400` validation failure, `503` Firestore configuration unavailable, `500` unexpected persistence failure.
+- Fictional seeded demo totals remain separate from real prototype aggregates.
 
-## Phase 5 — Gemini audience-analysis integration — Planned
+**Known limitation:** Clearing browser storage creates a new anonymous identity. The session hash is duplicate-detection infrastructure, not authentication or production-grade abuse prevention.
 
-**Scope:** Generate a validated audience-development brief from trusted totals.
+**Validation:** Passed during Phase 4B implementation: lint, 9 focused tests, typecheck, and production build.
 
-**Tasks:** Add server-only `@google/genai` integration, Zod schemas, and failure
-handling.
+## Phase 5A — Gemini Audience Analyst — Planned
 
-**Acceptance criteria:** Gemini receives trusted aggregates only and invalid
-model output cannot enter workflow state.
+**Scope:** Generate a validated audience-development brief from trusted server-derived vote aggregates.
 
-**Validation:** Run lint, tests, type checking, build, schema tests, and mocked
-failure scenarios.
+**Tasks:** Add server-only `@google/genai` integration, structured output schemas, retry/failure handling, and a minimal creator-facing analysis result.
+
+**Acceptance criteria:** Gemini receives trusted aggregate data only; raw anonymous identifiers are never sent to the model; invalid model output cannot enter workflow state.
+
+**Validation:** Run lint, tests, typecheck, build, schema tests, and mocked model failure scenarios.
+
+## Phase 5B — Audience analysis workflow hardening — Planned
+
+**Scope:** Make the analyst result reliable enough for creator review.
+
+**Tasks:** Add no-data behavior, close-result interpretation, deterministic input shaping, retry limits, and traceable analysis metadata.
+
+**Acceptance criteria:** Analysis remains grounded in trusted stored totals and fails honestly when model output is unavailable or invalid.
 
 ## Phase 6 — Creator approval workflow — Planned
 
-**Scope:** Require approval, edit, or rejection of the proposed direction.
-
-**Tasks:** Model workflow states and creator decisions.
-
-**Acceptance criteria:** A scene cannot be generated before an approved brief.
-
-**Validation:** Run lint, tests, type checking, build, and state-transition tests.
+Require approval, edit, or rejection of the proposed direction before creative generation.
 
 ## Phase 7 — Opening-scene generation — Planned
 
-**Scope:** Produce one opening screenplay scene after approval.
-
-**Tasks:** Add the Screenwriter workflow and validate its structured result.
-
-**Acceptance criteria:** Exactly one reviewable scene is generated only from
-approved direction.
-
-**Validation:** Run lint, tests, type checking, build, schema tests, and approval-gate tests.
+Produce one opening screenplay scene only after creator approval.
 
 ## Phase 8 — Continuity and story-logic analysis — Planned
 
-**Scope:** Analyze the approved direction and opening scene.
+Analyze the approved direction and opening scene for continuity, chronology, character knowledge, motivation, world rules, setups, payoffs, contradictions, unresolved threads, and plot holes.
 
-**Tasks:** Return findings on physical continuity and story logic.
+## Phase 9 — Workflow persistence and Firestore hardening — Planned
 
-**Acceptance criteria:** Analysis covers knowledge, motivation, props,
-condition, costumes, injuries, locations, chronology, rules, setups, payoffs,
-unresolved threads, contradictions, and plot holes.
+**Scope:** Expand Firestore beyond vote storage to approved briefs, workflow state, generated scenes, and analysis results, while adding reviewed retention and production security configuration.
 
-**Validation:** Run lint, tests, type checking, build, and representative finding tests.
-
-## Phase 9 — Firestore persistence — Planned
-
-**Scope:** Persist approved MVP data in Cloud Firestore.
-
-**Tasks:** Define schemas, access rules, migrations/fixtures, and retention.
-
-**Acceptance criteria:** Core workflow data persists safely with documented access control.
-
-**Validation:** Run lint, tests, type checking, build, and Firestore-rule tests.
+**Note:** Vote persistence itself was completed early in Phase 4B and is no longer deferred to this phase.
 
 ## Phase 10 — Authentication and stronger vote integrity — Planned
 
-**Scope:** Add authenticated voting and public-deployment integrity controls.
-
-**Tasks:** Add Firebase Authentication or Google sign-in, rate limiting, and auditability.
-
-**Acceptance criteria:** Authenticated rules and abuse controls are enforced server-side.
-
-**Validation:** Run lint, tests, type checking, build, and security/integrity tests.
+Add creator authorization, stronger voter identity/abuse controls, rate limiting, auditability, and reviewed public-deployment safeguards.
 
 ## Phase 11 — Agent orchestration — Planned
 
-**Scope:** Formalize workflow orchestration and recoverable failures.
-
-**Tasks:** Implement ordered states, retries, observability, and approval gates.
-
-**Acceptance criteria:** The Orchestrator prevents out-of-order execution.
-
-**Validation:** Run lint, tests, type checking, build, and workflow tests.
+Formalize ordered workflow states, recoverable failures, retries, observability, and approval gates.
 
 ## Phase 12 — Google Cloud Agent Builder and partner MCP integration — Planned
 
-**Scope:** Integrate Agent Builder and only the partner MCP selected by the confirmed track.
-
-**Tasks:** Confirm requirements, implement the selected integration, and document boundaries.
-
-**Acceptance criteria:** No invented partner integration; confirmed requirements are met.
-
-**Validation:** Run lint, tests, type checking, build, and partner-required validation.
+Confirm current hackathon requirements, integrate Agent Builder, implement only the selected partner MCP, and document the trust boundaries.
 
 ## Phase 13 — UX, accessibility, testing, and error handling — Planned
 
-**Scope:** Improve usability, accessibility, resilience, and test coverage.
-
-**Tasks:** Address keyboard, screen-reader, loading, error, and no-data states.
-
-**Acceptance criteria:** Core flows are accessible and failures are honest and actionable.
-
-**Validation:** Run lint, tests, type checking, build, accessibility checks, and manual QA.
+Improve keyboard, screen-reader, loading, error, no-data, resilience, and broader test coverage.
 
 ## Phase 14 — Deployment and hackathon demo preparation — Planned
 
-**Scope:** Prepare a safe, reliable demo deployment and presentation.
-
-**Tasks:** Configure deployment, environment handling, demo script, and fallback plan.
-
-**Acceptance criteria:** The demo uses fictional content and meets confirmed hackathon rules.
-
-**Validation:** Run lint, tests, type checking, build, deployment smoke tests, and demo rehearsal.
+Prepare a reliable demo deployment, environment configuration, demo script, smoke tests, and fallback plan using clearly fictional content.

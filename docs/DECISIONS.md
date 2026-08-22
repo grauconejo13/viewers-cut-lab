@@ -2,54 +2,54 @@
 
 ## Accepted decisions
 
-- Phase 0 is documentation only: no scaffold, packages, implementation, or
-  source-code files.
-- The planned stack is Next.js App Router, strict TypeScript, Tailwind CSS, and
-  Next.js route handlers; no separate Render, Express, or FastAPI backend is
-  planned initially.
-- Gemini uses `@google/genai` only from server-side code, and structured output
-  is validated with Zod.
+- Phase 0 is documentation only: no scaffold, packages, implementation, or source-code files.
+- The stack is Next.js App Router, strict TypeScript, Tailwind CSS, and Next.js route handlers; no separate Render, Express, or FastAPI backend is planned initially.
+- Gemini uses `@google/genai` only from server-side code, and structured output will be validated with Zod.
 - Deterministic rules decide vote validity; Gemini does not.
 - Creator approval is required before screenplay scene generation.
-- The MVP contains fictional demonstration content only and makes no claims of
-  real demand, votes, testimonials, or production outcomes.
-- Phase 3 received a UX refinement: the opening audience journey is framed as
-  an interactive unfinished movie, with narrative scene context and one story
-  decision at a time, while retaining the existing local-only validation,
-  review, reset, and accessibility behavior.
-- The audience experience is split into homepage discovery and `/story/[movieId]`
-  for focused decisions. This route uses only local client state, confirms before
-  clearing an in-progress cut on exit, and keeps responsive decision navigation
-  separate from unrelated homepage content.
-- Phase 4A trusts only validated `POST /api/votes` submissions and keeps local
-  development persistence behind an in-memory repository. Duplicate prevention
-  is keyed by anonymous session and movie; fictional seeded counts never merge
-  with prototype submission aggregates.
+- The MVP contains fictional demonstration content only and makes no claims of real demand, testimonials, or production outcomes.
+- The audience journey is framed as an interactive unfinished movie with one story decision at a time.
+- Homepage discovery and `/story/[movieId]` are separate so the story flow remains focused and responsive.
+- `POST /api/votes` is the trusted boundary for completed cuts; client totals and percentages are never authoritative.
+- Cloud Firestore is the current durable prototype vote store.
+- Firestore uses `prototypeVotes/{movieId}` for aggregate trusted totals/counts and `prototypeVotes/{movieId}/submissions/{sessionHash}` for one validated completed cut per anonymous session and movie.
+- Duplicate detection, submission creation, and aggregate updates happen in one Firestore transaction.
+- Anonymous browser session IDs are validated server-side, then hashed with SHA-256 using `VOTE_SESSION_HASH_SECRET` and movie ID before persistence. Raw session IDs are not stored.
+- The anonymous session hash is duplicate-detection infrastructure only; it is not authentication or strong anti-abuse protection.
+- Fictional seeded counts remain separate from real prototype submissions.
+- Unit tests use `MemoryVoteRepository` and do not require a live Firestore project.
+- The current vote API contract is `200` success, `409` duplicate, `400` validation failure, `503` missing persistence configuration, and `500` unexpected persistence failure.
+
+## Current environment decisions
+
+- `FIRESTORE_PROJECT_ID` and `VOTE_SESSION_HASH_SECRET` are required for the Firestore-backed vote repository.
+- `FIRESTORE_EMULATOR_HOST` is optional for local emulator use and should not be configured for production deployment.
+- Real secrets are never committed and never use the `NEXT_PUBLIC_` prefix.
 
 ## Provisional decisions
 
-- Cloud Firestore is the planned database.
-- Secure server cookies identify anonymous prototype sessions.
-- Firebase Authentication or Google sign-in are planned for the real version.
-- Vercel may host early previews; Cloud Run is a possible final Google Cloud
-  target.
+- Firebase Authentication or Google sign-in may be added for stronger identity and creator authorization later.
+- Vercel hosts early previews; Cloud Run remains a possible final Google Cloud target.
 - Google Cloud Agent Builder is planned for the final agent workflow.
-- Responsibilities may begin as deterministic services and workflow modules,
-  rather than separate AI agents.
+- Responsibilities may begin as deterministic services and workflow modules rather than separate AI agents.
+- Stronger rate limiting, abuse controls, auditability, and retention policy remain later hardening work.
+
+## Next authorized phase
+
+Phase 5A — Gemini Audience Analyst.
+
+Phase 5A has not started. It should consume only trusted server-derived aggregates and must validate structured model output before that output enters workflow state.
 
 ## Unresolved questions
 
 - What creator identity and authorization model is sufficient for the MVP?
-- What rate-limit thresholds and held-versus-rejected rules are appropriate?
-- What exact Zod schemas, model settings, retry policy, and failure experience
-  should the Gemini workflows use?
+- What rate-limit thresholds and held-versus-rejected rules are appropriate for public traffic?
+- What exact Zod schemas, Gemini model settings, retry policy, and failure experience should Phase 5A use?
 - What continuity severities and creator-resolution actions are needed?
-- What Firestore schema and retention policy should be adopted?
+- What Firestore retention/deletion policy and production security configuration are appropriate?
 
 ## Hackathon and partner requirements awaiting confirmation
 
-- Partner track selection and its required integration are unconfirmed.
-- No partner integration is invented; Partner MCP integration begins only after
-  the track is selected.
-- Hackathon rubric, demo constraints, deployment requirements, and Agent Builder
-  expectations require confirmation before those phases begin.
+- Partner track implementation should begin only after its exact requirements are confirmed.
+- No partner integration should be invented merely to satisfy documentation.
+- Hackathon rubric, demo constraints, deployment requirements, and Agent Builder expectations should be rechecked before those phases begin.
