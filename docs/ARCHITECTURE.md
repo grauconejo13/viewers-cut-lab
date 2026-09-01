@@ -11,7 +11,7 @@ The implementation is a lightweight product prototype with a Next.js frontend, s
 - Backend entry points: Next.js route handlers
 - Vote persistence: Cloud Firestore via `@google-cloud/firestore`
 - Vote tests: repository abstraction with `MemoryVoteRepository`
-- AI integration: official Google Gen AI SDK via `@google/genai`, server-side only - the Phase 5A Audience Analyst is implemented, pending live-model validation
+- AI integration: official Google Gen AI SDK via `@google/genai`, server-side only - the Phase 5A Audience Analyst is complete, with live validation against the real Gemini Interactions API (`gemini-3.6-flash`)
 - Validation: trusted server definitions for vote input; Zod validates Gemini structured output before use
 - Deployment: Vercel preview deployment, with Cloud Run as a possible future Google Cloud target
 

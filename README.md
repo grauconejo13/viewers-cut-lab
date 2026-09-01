@@ -69,7 +69,7 @@ Client-provided totals and percentages are never trusted. Counts and stable one-
 - `502` — the Gemini request failed or its output failed validation
 - `500` — unexpected failure
 
-This endpoint has been validated with a mocked Gemini client in tests, not yet against a live Gemini API call.
+This endpoint has been validated with a mocked Gemini client in tests, and against the real Gemini Interactions API (`gemini-3.6-flash`) and a live Firestore trusted aggregate on 2026-09-01.
 
 ## First MVP definition
 

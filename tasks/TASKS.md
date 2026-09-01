@@ -2,7 +2,7 @@
 
 ## Status convention
 
-Phases 0 through 4B are complete. Phase 5A is implemented and passes lint, tests, typecheck, and build with a mocked Gemini client; it has not been validated against a live Gemini API call, so it is not marked Completed. Phase 5B and later work remain planned and must be explicitly implemented and validated before their status changes.
+Phases 0 through 5A are complete. Phase 5B and later work remain planned and must be explicitly implemented and validated before their status changes.
 
 ## Phase 0 — Documentation and repository foundation — Completed
 
@@ -69,7 +69,7 @@ Implemented validated `POST /api/votes` submission, repository abstraction, one-
 
 **Validation:** Passed during Phase 4B implementation: lint, 9 focused tests, typecheck, and production build.
 
-## Phase 5A — Gemini Audience Analyst — Implemented, pending live-model validation
+## Phase 5A — Gemini Audience Analyst — Completed
 
 **Scope:** Generate a validated Audience Analyst result from trusted server-derived vote aggregates.
 
@@ -80,11 +80,13 @@ Implemented validated `POST /api/votes` submission, repository abstraction, one-
 - `VoteRepository.getAggregate(movieId)` — a read-only trusted-aggregate accessor added to both `MemoryVoteRepository` and `FirestoreVoteRepository` so the analyst never needs submission documents, session hashes, or raw session IDs.
 - Response codes: `404` unknown movie ID, `503` missing Gemini or Firestore configuration, `502` Gemini request failure or output that fails Zod validation, `500` unexpected failure.
 
-**Not yet done:** No live call against the real Gemini API has been made (tests use a mocked `AudienceAnalystModel`); no-data/close-result interpretation hardening is deferred to Phase 5B; the result is not yet wired into a creator-facing brief or approval flow.
+**Not yet done:** no-data/close-result interpretation hardening is deferred to Phase 5B; the result is not yet wired into a creator-facing brief or approval flow.
 
 **Acceptance criteria:** Gemini receives trusted aggregate data only; raw anonymous identifiers are never sent to the model; invalid model output cannot enter workflow state.
 
-**Validation:** Passed with mocked Gemini client: lint, 16 tests (7 new, covering valid output, unknown movie ID, non-JSON output, schema-invalid output, unexpected extra fields, model failure, and a boundary test confirming the payload sent to Gemini never contains session/hash data), typecheck, and production build. Live Gemini API validation has not been run.
+**Validation:** Passed with mocked Gemini client: lint, 18 tests, typecheck, and production build.
+
+**Live end-to-end validation:** Passed on 2026-09-01 against `GET /api/audience-analysis/luminous-archive` using real infrastructure: a Firestore trusted-aggregate read, the real Gemini Interactions API (`gemini-3.6-flash`), and strict Zod output validation. The endpoint returned `200` with a structured Audience Analyst result. The aggregate used had zero trusted submissions, and Gemini correctly returned a no-signal / wait-for-participation recommendation rather than fabricating audience patterns - confirming the schema and prompt hold up on real, unvalidated model output as well as on the mocked test cases. Close-result and no-data *handling* (beyond Gemini's own honest response) remains Phase 5B scope.
 
 ## Phase 5B — Audience analysis workflow hardening — Planned
 

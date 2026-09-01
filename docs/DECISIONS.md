@@ -40,7 +40,7 @@
 
 Phase 5B — Audience analysis workflow hardening.
 
-Phase 5A is implemented: it consumes only trusted server-derived aggregates and validates structured model output before that output enters workflow state. It has passed lint, tests, typecheck, and build using a mocked Gemini client, but has not yet been validated against a live Gemini API call, and is not wired into a creator-facing brief or approval flow.
+Phase 5A is complete: it consumes only trusted server-derived aggregates and validates structured model output before that output enters workflow state. It has passed lint, tests, typecheck, and build using a mocked Gemini client, and has additionally passed live end-to-end validation (real Firestore aggregate read, real Gemini Interactions API on `gemini-3.6-flash`, strict Zod output validation) on 2026-09-01. It is not yet wired into a creator-facing brief or approval flow - that begins with Phase 6, which has not started.
 
 ## Unresolved questions
 
