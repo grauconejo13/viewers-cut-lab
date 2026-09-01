@@ -75,7 +75,7 @@ export function BallotFlow({ concept }: { concept: MovieConcept }) {
         status?: "submitted" | "duplicate";
         aggregate?: VoteAggregate;
       };
-      if (response.status === 201 || response.status === 409) {
+      if (response.status === 200 || response.status === 409) {
         setAggregate(data.aggregate ?? null);
         setStatus(data.status === "duplicate" ? "duplicate" : "idle");
         setStep(2);
