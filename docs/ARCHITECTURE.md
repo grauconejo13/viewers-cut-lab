@@ -11,8 +11,8 @@ The implementation is a lightweight product prototype with a Next.js frontend, s
 - Backend entry points: Next.js route handlers
 - Vote persistence: Cloud Firestore via `@google-cloud/firestore`
 - Vote tests: repository abstraction with `MemoryVoteRepository`
-- AI integration: official Google Gen AI SDK via `@google/genai` planned for Phase 5A
-- Validation: trusted server definitions for vote input; Zod planned for model-output validation
+- AI integration: official Google Gen AI SDK via `@google/genai`, server-side only - the Phase 5A Audience Analyst is implemented, pending live-model validation
+- Validation: trusted server definitions for vote input; Zod validates Gemini structured output before use
 - Deployment: Vercel preview deployment, with Cloud Run as a possible future Google Cloud target
 
 ## Audience routes
@@ -84,6 +84,20 @@ The browser creates an anonymous session identifier for the prototype. The serve
 
 The hash is only a duplicate-detection key. It is not authentication, authorization, or strong anti-abuse protection. Clearing browser storage creates a new anonymous identity.
 
+## Audience Analyst boundary (Phase 5A)
+
+`GET /api/audience-analysis/[movieId]` is the current Gemini trust boundary.
+
+The route:
+
+1. resolves the fictional movie concept from the trusted server definitions, returning `404` for an unknown ID,
+2. reads the trusted aggregate for that movie through `VoteRepository.getAggregate()` - a read-only accessor that touches only the `prototypeVotes/{movieId}` summary document, never the `submissions` subcollection,
+3. sends Gemini only fictional movie/question metadata and the trusted counts/percentages/total, never session IDs, session hashes, or submission documents,
+4. requests structured JSON output constrained to the Audience Analyst schema,
+5. validates the response with a strict Zod schema (`AudienceAnalysisSchema`) before returning it; invalid JSON, schema failures, or extra fields are rejected as `502` rather than passed through.
+
+The Gemini call itself is isolated behind a small `AudienceAnalystModel` interface (`generate(prompt): Promise<string>`) so tests can mock the model without a live API call or key.
+
 ## Environment configuration
 
 Server-side vote persistence uses:
@@ -92,7 +106,11 @@ Server-side vote persistence uses:
 - `VOTE_SESSION_HASH_SECRET` — required and secret
 - `FIRESTORE_EMULATOR_HOST` — optional for local emulator use
 
-When the emulator host is set, the Firestore client connects to that host without SSL. Unit tests do not require Firestore and use `MemoryVoteRepository` instead.
+The Audience Analyst additionally requires:
+
+- `GEMINI_API_KEY` — required server-side secret; missing configuration returns `503` rather than calling Gemini
+
+When the emulator host is set, the Firestore client connects to that host without SSL. Unit tests do not require Firestore or Gemini and use `MemoryVoteRepository` and a mocked `AudienceAnalystModel` instead.
 
 ## Architectural principles
 

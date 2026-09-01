@@ -51,6 +51,7 @@ export interface VoteRepository {
     answers: BallotAnswer,
     sessionHash: string,
   ): Promise<{ status: "submitted" | "duplicate"; aggregate: VoteAggregate }>;
+  getAggregate(movieId: string): Promise<VoteAggregate>;
 }
 const aggregate = (
   movieId: string,
@@ -86,6 +87,9 @@ export class MemoryVoteRepository implements VoteRepository {
       Object.values(i.answers).forEach(([id]) => counts[id]++),
     );
     return aggregate(movieId, matching.length, counts);
+  }
+  async getAggregate(movieId: string) {
+    return this.get(movieId);
   }
 }
 export class FirestoreVoteRepository implements VoteRepository {
@@ -137,6 +141,15 @@ export class FirestoreVoteRepository implements VoteRepository {
         ),
       };
     });
+  }
+  async getAggregate(movieId: string) {
+    const summary = this.db.doc(`prototypeVotes/${movieId}`);
+    const data = (await summary.get()).data() ?? {};
+    return aggregate(
+      movieId,
+      data.totalSubmissions ?? 0,
+      data.counts ?? Object.fromEntries(ids(movieId).map((id) => [id, 0])),
+    );
   }
 }
 export function firestoreRepositoryFromEnv() {

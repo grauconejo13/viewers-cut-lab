@@ -17,7 +17,7 @@ The anonymous session model is intentionally lightweight. Clearing browser stora
 - Tailwind CSS
 - Next.js route handlers as the backend boundary
 - `@google-cloud/firestore` for durable prototype vote persistence
-- Official Google Gen AI SDK using `@google/genai` planned for Phase 5A
+- Official Google Gen AI SDK using `@google/genai` — server-side Audience Analyst implemented in Phase 5A
 - Gemini calls only from server-side code
 - Zod for model-output validation in AI phases
 - Google Cloud Agent Builder planned for the final agent workflow
@@ -43,7 +43,7 @@ Copy `.env.example` and configure server-side values as needed:
 - `FIRESTORE_PROJECT_ID` — required for the Firestore-backed vote repository
 - `VOTE_SESSION_HASH_SECRET` — required server-only secret used when hashing anonymous session IDs
 - `FIRESTORE_EMULATOR_HOST` — optional local emulator host; do not set it in production
-- `GEMINI_API_KEY` — reserved for the planned Gemini integration and not required for Phase 4 voting
+- `GEMINI_API_KEY` — required server-side for `GET /api/audience-analysis/[movieId]` (Phase 5A); not required for Phase 4 voting
 
 Do not commit real credentials or secrets. Do not prefix server secrets with `NEXT_PUBLIC_`.
 
@@ -58,6 +58,18 @@ Do not commit real credentials or secrets. Do not prefix server secrets with `NE
 - `500` for other persistence failures
 
 Client-provided totals and percentages are never trusted. Counts and stable one-decimal percentages are derived server-side from trusted stored submissions.
+
+## Audience Analyst API (Phase 5A)
+
+`GET /api/audience-analysis/[movieId]` sends only the trusted server-derived aggregate (counts, percentages, total submissions) and fictional movie/question metadata to Gemini - never session IDs, session hashes, or submission documents. The response is validated against a strict Zod schema before it is returned; invalid or unavailable output never reaches the client.
+
+- `200` — validated Audience Analyst result
+- `404` — unknown movie ID
+- `503` — Gemini or Firestore is not configured
+- `502` — the Gemini request failed or its output failed validation
+- `500` — unexpected failure
+
+This endpoint has been validated with a mocked Gemini client in tests, not yet against a live Gemini API call.
 
 ## First MVP definition
 

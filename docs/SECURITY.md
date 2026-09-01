@@ -6,7 +6,7 @@
 - API keys and sensitive configuration never reach browser code.
 - `NEXT_PUBLIC_` is never used for secrets, and real `.env` values are never committed.
 - All external input is validated before trusted persistence or workflow use.
-- Gemini output will be validated with Zod before it changes workflow state or is displayed as structured content.
+- Gemini output is validated with Zod (Phase 5A `AudienceAnalysisSchema`, strict-mode) before it changes workflow state or is displayed as structured content.
 - Deterministic vote rules remain authoritative; AI never decides ballot validity.
 
 ## Current prototype session model
@@ -41,7 +41,7 @@ Current server-side configuration includes:
 - `FIRESTORE_PROJECT_ID` — Firestore project identifier; required for Firestore vote persistence
 - `VOTE_SESSION_HASH_SECRET` — required secret used to hash anonymous session IDs
 - `FIRESTORE_EMULATOR_HOST` — optional local emulator host and not intended for production deployment
-- `GEMINI_API_KEY` — reserved for planned server-side Gemini integration
+- `GEMINI_API_KEY` — required server-side secret for the Phase 5A Audience Analyst (`GET /api/audience-analysis/[movieId]`); never exposed with `NEXT_PUBLIC_`
 
 Never commit real values. Keep `VOTE_SESSION_HASH_SECRET` private and sufficiently random. Rotate it intentionally because changing it changes duplicate-detection hashes for future requests.
 
@@ -63,6 +63,15 @@ The MVP does not collect device fingerprints. Fictional demo counts remain separ
 - unexpected persistence failures return `500`.
 
 Failures should be logged without secrets or unnecessary request payload data.
+
+## Gemini trust boundary (Phase 5A)
+
+`GET /api/audience-analysis/[movieId]` sends Gemini only fictional movie/question metadata and the trusted server-derived aggregate (counts, percentages, total submissions). Session IDs, session hashes, and submission documents are never sent to Gemini.
+
+- unknown movie ID returns `404`,
+- missing `GEMINI_API_KEY` or Firestore configuration returns `503`,
+- a failed Gemini request or output that fails Zod validation returns `502`,
+- unexpected failures return `500`.
 
 ## Before public or production-grade deployment
 

@@ -19,6 +19,8 @@
 - Fictional seeded counts remain separate from real prototype submissions.
 - Unit tests use `MemoryVoteRepository` and do not require a live Firestore project.
 - The current vote API contract is `200` success, `409` duplicate, `400` validation failure, `503` missing persistence configuration, and `500` unexpected persistence failure.
+- Phase 5A's Audience Analyst sends Gemini only fictional movie/question metadata and the trusted server-derived aggregate; it never sends session IDs, session hashes, or submission documents.
+- The Audience Analyst API contract is `200` success, `404` unknown movie ID, `503` missing Gemini or Firestore configuration, `502` Gemini request failure or output that fails Zod validation, and `500` unexpected failure.
 
 ## Current environment decisions
 
@@ -36,9 +38,9 @@
 
 ## Next authorized phase
 
-Phase 5A — Gemini Audience Analyst.
+Phase 5B — Audience analysis workflow hardening.
 
-Phase 5A has not started. It should consume only trusted server-derived aggregates and must validate structured model output before that output enters workflow state.
+Phase 5A is implemented: it consumes only trusted server-derived aggregates and validates structured model output before that output enters workflow state. It has passed lint, tests, typecheck, and build using a mocked Gemini client, but has not yet been validated against a live Gemini API call, and is not wired into a creator-facing brief or approval flow.
 
 ## Unresolved questions
 
