@@ -40,7 +40,9 @@
 
 Phase 5B — Audience analysis workflow hardening.
 
-Phase 5A is complete: it consumes only trusted server-derived aggregates and validates structured model output before that output enters workflow state. It has passed lint, tests, typecheck, and build using a mocked Gemini client, and has additionally passed live end-to-end validation (real Firestore aggregate read, real Gemini Interactions API on `gemini-3.6-flash`, strict Zod output validation) on 2026-09-01. It is not yet wired into a creator-facing brief or approval flow - that begins with Phase 6, which has not started.
+Phase 5A is complete: it consumes only trusted server-derived aggregates and validates structured model output before that output enters workflow state. It has passed lint, tests, typecheck, and build using a mocked Gemini client, and has additionally passed live end-to-end validation (real Firestore aggregate read, real Gemini Interactions API on `gemini-3.6-flash`, strict Zod output validation) on 2026-09-01.
+
+Phase 6 is also complete: creator-review state (`analysis_ready`/`approved`/`rejected`/`revision_requested`) is server-authoritative, invalid transitions are rejected deterministically, and an approval gate is in place for Phase 7 to call. Its store (`CreatorReviewRepository`) is in-memory and resets on process restart. It has passed lint, tests, typecheck, and build with mocked dependencies, and live end-to-end validation of the real creator flow for `luminous-archive` (real Gemini execution, review creation, UI rendering, and an `analysis_ready -> approved` transition confirmed via `GET /api/creator-review/luminous-archive` returning `200` with status `"approved"`) on 2026-09-01.
 
 ## Unresolved questions
 

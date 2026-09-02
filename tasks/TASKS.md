@@ -2,7 +2,7 @@
 
 ## Status convention
 
-Phases 0 through 5A are complete. Phase 5B and later work remain planned and must be explicitly implemented and validated before their status changes.
+Phases 0 through 5A and Phase 6 are complete, with Phase 6 implemented ahead of Phase 5B at the explicit request that directed that work. Phase 5B, Phase 7, and all later work remain planned and must be explicitly implemented and validated before their status changes.
 
 ## Phase 0 — Documentation and repository foundation — Completed
 
@@ -96,9 +96,25 @@ Implemented validated `POST /api/votes` submission, repository abstraction, one-
 
 **Acceptance criteria:** Analysis remains grounded in trusted stored totals and fails honestly when model output is unavailable or invalid.
 
-## Phase 6 — Creator approval workflow — Planned
+## Phase 6 — Creator approval workflow — Completed
 
-Require approval, edit, or rejection of the proposed direction before creative generation.
+**Scope:** Require approval, edit, or rejection of the proposed direction before creative generation.
+
+**Implemented:**
+
+- `src/lib/creatorReview.ts` - a `CreatorReview` model (`movieId`, the Phase 5A `AudienceAnalysis`, `status`, optional `note`, `createdAt`/`updatedAt`) with four states (`analysis_ready`, `approved`, `rejected`, `revision_requested`); a deterministic transition table where only `analysis_ready -> approved | rejected | revision_requested` is valid and anything else throws `CreatorReviewTransitionError`; a Zod-validated decision request (`action`, optional `note`); a storage-agnostic `CreatorReviewRepository` interface (`get`/`save`) with an in-memory implementation, matching the Phase 4A-before-4B pattern so Firestore persistence can be added later without changing route contracts; and an approval gate (`isApprovedForGeneration` / `requireApprovedReview`) for Phase 7 to call.
+- `GET /api/creator-review/[movieId]` - retrieves the current review (`404` unknown movie or no review started).
+- `POST /api/creator-review/[movieId]` - starts/restarts a review by running the existing Phase 5A Audience Analyst pipeline unchanged and storing its result as a new `analysis_ready` review (`404`/`503`/`502` mirror the Phase 5A route's own error mapping).
+- `POST /api/creator-review/[movieId]/decision` - approve/reject/request-revision with an optional note (`400` invalid request, `404` unknown movie or no review started, `409` invalid transition).
+- `/creator/[movieId]` - a minimal internal review page (`CreatorReviewPanel`), reachable only by direct URL and not linked from the public homepage or `/story/[movieId]` flow, showing dominant preferences, close decisions, audience tensions, narrative risks, recommended direction, and Approve / Request revision / Reject controls.
+
+**Known limitation:** `CreatorReviewRepository` is in-memory (`MemoryCreatorReviewRepository`) and resets on process restart; Firestore persistence for review state is deferred, structured so it can be added later without changing route contracts. Screenplay generation, continuity analysis, Agent Builder, and partner MCP remain explicitly out of scope for this phase.
+
+**Acceptance criteria:** Creator-review state is server-authoritative; invalid transitions are rejected deterministically; a screenplay cannot be generated before an approved review (enforced by the Phase 6 approval-gate helper, to be called once Phase 7 exists).
+
+**Validation:** Passed with mocked dependencies: lint, 30 tests (12 new, covering valid/invalid transitions, decision-request validation, creator-note handling, and approval-gate behavior), typecheck, and production build.
+
+**Live end-to-end validation:** Passed on 2026-09-01 against the real creator flow for `luminous-archive`: real Gemini Audience Analyst execution, creator-review creation, creator-review UI rendering, and a successful `analysis_ready -> approved` transition. `GET /api/creator-review/luminous-archive` returned `200` with status `"approved"`, and approval-gate logic was confirmed intact.
 
 ## Phase 7 — Opening-scene generation — Planned
 
