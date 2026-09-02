@@ -164,12 +164,13 @@ test("continuity prompt explicitly forbids invented unsupported facts and screen
 
 test("rejects non-JSON model output", async () => {
   const creatorRepo = await approvedReviewRepo();
+  const scenes = await sceneRepo();
   await assert.rejects(
     () =>
       runContinuityAnalysis(
         movie.id,
         creatorRepo,
-        await sceneRepo(),
+        scenes,
         new MemoryContinuityRepository(),
         model("not-json"),
       ),
@@ -179,12 +180,13 @@ test("rejects non-JSON model output", async () => {
 
 test("rejects structured output that fails the strict schema", async () => {
   const creatorRepo = await approvedReviewRepo();
+  const scenes = await sceneRepo();
   await assert.rejects(
     () =>
       runContinuityAnalysis(
         movie.id,
         creatorRepo,
-        await sceneRepo(),
+        scenes,
         new MemoryContinuityRepository(),
         model(JSON.stringify({ ...validAnalysis, extra: "nope" })),
       ),
