@@ -97,7 +97,12 @@ export function ContinuityReviewPanel({ movieId }: { movieId: string }) {
 
   useEffect(() => {
     void load();
-  }, [load]);
+    if (eligible) return;
+    const interval = window.setInterval(() => {
+      void load();
+    }, 1500);
+    return () => window.clearInterval(interval);
+  }, [eligible, load]);
 
   if (!eligible) return null;
 
@@ -135,9 +140,7 @@ export function ContinuityReviewPanel({ movieId }: { movieId: string }) {
           </p>
         )}
 
-        {!analysis && (
-          <p>Run a continuity check on the approved opening scene.</p>
-        )}
+        {!analysis && <p>Run a continuity check on the approved opening scene.</p>}
 
         {analysis && (
           <>
