@@ -19,11 +19,20 @@ export class ContinuityConfigError extends Error {}
 export class ContinuityModelError extends Error {}
 export class ContinuityOutputError extends Error {}
 
+export const ContinuityIssueConfidenceSchema = z.enum([
+  "confirmed",
+  "risk",
+  "watchpoint",
+]);
+export type ContinuityIssueConfidence = z.infer<
+  typeof ContinuityIssueConfidenceSchema
+>;
+
 const issueSchema = z
   .object({
     summary: z.string().min(1).max(240),
     evidence: z.string().min(1).max(500),
-    confidence: z.enum(["confirmed", "risk"]),
+    confidence: ContinuityIssueConfidenceSchema,
   })
   .strict();
 
@@ -59,7 +68,10 @@ const issueResponseSchema = {
   properties: {
     summary: { type: "string" },
     evidence: { type: "string" },
-    confidence: { type: "string", enum: ["confirmed", "risk"] },
+    confidence: {
+      type: "string",
+      enum: ["confirmed", "risk", "watchpoint"],
+    },
   },
   required: ["summary", "evidence", "confidence"],
 } as const;
@@ -139,7 +151,8 @@ export function buildContinuityPrompt(
     "You are the continuity supervisor and story-logic editor for a fictional interactive movie lab.",
     "Review exactly the supplied opening scene against the supplied movie context and approved creator direction.",
     "Identify contradictions and logic problems; do not rewrite the screenplay.",
-    "Use confidence=confirmed only when the supplied data directly demonstrates the problem. Use confidence=risk for speculative or unresolved concerns.",
+    "Classify each issue carefully: confidence=confirmed only when the supplied material directly contradicts itself or directly demonstrates the problem; confidence=risk when there is enough evidence for concern but not enough to prove a contradiction; confidence=watchpoint when something is valid now but future scenes must keep it consistent, such as character knowledge, object state, location, setup/payoff, unresolved fact, or an emerging world rule.",
+    "Do not treat ordinary mystery, unanswered setup, or intentionally undefined world rules as defects merely because they are unresolved; use watchpoint when the material is currently coherent but should be tracked.",
     "Do not invent canon, backstory, world rules, character facts, or continuity facts that are not present in the supplied data.",
     "Check character behavior, world logic, internal continuity, unresolved narrative risks, and alignment with the approved direction.",
     "Recommended fixes should be concise editorial actions, not replacement screenplay prose.",
