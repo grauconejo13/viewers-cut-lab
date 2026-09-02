@@ -20,11 +20,11 @@ export default async function CreatorReviewPage({
   return (
     <>
       <CreatorReviewPanel movieId={concept.id} title={concept.title} />
-      <main className="story-shell">
+      <section className="story-shell" aria-label="Continuity review">
         <div className="story-main">
           <ContinuityReviewPanel movieId={concept.id} />
         </div>
-      </main>
+      </section>
     </>
   );
 }
