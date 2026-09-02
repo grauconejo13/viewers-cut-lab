@@ -2,7 +2,7 @@
 
 ## Status convention
 
-Phases 0 through 5A and Phase 6 are complete, with Phase 6 implemented ahead of Phase 5B at the explicit request that directed that work. Phase 5B, Phase 7, and all later work remain planned and must be explicitly implemented and validated before their status changes.
+Phases 0 through 6 are complete, with Phase 6 implemented ahead of Phase 5B at the explicit request that directed that work. Phase 7 and all later work remain planned and must be explicitly implemented and validated before their status changes.
 
 ## Phase 0 — Documentation and repository foundation — Completed
 
@@ -80,7 +80,7 @@ Implemented validated `POST /api/votes` submission, repository abstraction, one-
 - `VoteRepository.getAggregate(movieId)` — a read-only trusted-aggregate accessor added to both `MemoryVoteRepository` and `FirestoreVoteRepository` so the analyst never needs submission documents, session hashes, or raw session IDs.
 - Response codes: `404` unknown movie ID, `503` missing Gemini or Firestore configuration, `502` Gemini request failure or output that fails Zod validation, `500` unexpected failure.
 
-**Not yet done:** no-data/close-result interpretation hardening is deferred to Phase 5B; the result is not yet wired into a creator-facing brief or approval flow.
+**Not yet done:** no-data/close-result interpretation hardening was completed in Phase 5B (see below); the result is not yet wired into a creator-facing brief beyond the Phase 6 creator-review workflow.
 
 **Acceptance criteria:** Gemini receives trusted aggregate data only; raw anonymous identifiers are never sent to the model; invalid model output cannot enter workflow state.
 
@@ -88,13 +88,22 @@ Implemented validated `POST /api/votes` submission, repository abstraction, one-
 
 **Live end-to-end validation:** Passed on 2026-09-01 against `GET /api/audience-analysis/luminous-archive` using real infrastructure: a Firestore trusted-aggregate read, the real Gemini Interactions API (`gemini-3.6-flash`), and strict Zod output validation. The endpoint returned `200` with a structured Audience Analyst result. The aggregate used had zero trusted submissions, and Gemini correctly returned a no-signal / wait-for-participation recommendation rather than fabricating audience patterns - confirming the schema and prompt hold up on real, unvalidated model output as well as on the mocked test cases. Close-result and no-data *handling* (beyond Gemini's own honest response) remains Phase 5B scope.
 
-## Phase 5B — Audience analysis workflow hardening — Planned
+## Phase 5B — Audience analysis workflow hardening — Completed
 
-**Scope:** Make the analyst result reliable enough for creator review.
+**Scope:** Make the analyst result reliable enough for creator review, and clearer around low-signal data, without changing the Phase 4B voting behavior, the Phase 5A Gemini contract, or the Phase 6 creator-review workflow and approval gate.
 
-**Tasks:** Add no-data behavior, close-result interpretation, deterministic input shaping, retry limits, and traceable analysis metadata.
+**Implemented:**
 
-**Acceptance criteria:** Analysis remains grounded in trusted stored totals and fails honestly when model output is unavailable or invalid.
+- `MIN_AUDIENCE_SUBMISSIONS` (currently `5`) in `src/lib/audienceAnalyst.ts` - below this many trusted submissions, `analyzeAudience` skips Gemini entirely (this covers zero submissions too) and returns a deterministic, non-Gemini `AudienceAnalysis` from `buildDeterministicAnalysis`. Every string in that result explicitly says "deterministic" and never claims to be Gemini-generated, so it is unambiguous in the data itself, not just in code. A dedicated `narrativeRisks` entry names the exact submission count and the threshold. The result always validates against the unchanged, strict `AudienceAnalysisSchema`.
+- `CLOSE_DECISION_MARGIN_POINTS` (currently `5` percentage points) and `detectCloseDecisions()` - deterministically flags a question's top two options as a close decision when they are tied or within this margin, purely from trusted percentages. Used two ways: included in the trusted input sent to Gemini once the threshold is met (with an added prompt instruction not to invent certainty where a question is marked close), and surfaced directly in the deterministic low-signal result without calling Gemini.
+- `src/lib/creatorReviewUi.ts` - two pure helpers extracted from `CreatorReviewPanel` so loading/error UI logic is unit-testable without a DOM/component framework: `analysisTriggerLabel` (busy copy, e.g. "Analyzing audience signal…", no fake progress percentage) and `resolveErrorMessage` (safe fallback text, never a raw stack trace or provider secret).
+- `CreatorReviewPanel` - distinguishes the initial state-check load ("Loading creator review…") from the Gemini-backed analysis request (trigger button reads "Analyzing audience signal…" and is disabled, with `aria-busy`, while in flight); errors surface via the existing alert region instead of the UI appearing frozen. The public `/story/[movieId]` flow is untouched.
+
+**Acceptance criteria:** Analysis remains grounded in trusted stored totals; zero and below-threshold submissions never reach Gemini and still produce schema-valid, clearly-deterministic output; close/tied results are surfaced instead of invented certainty; a deterministic result remains valid input for starting a Phase 6 creator review; Phase 4B voting, the Phase 5A route contract, and Phase 6 transitions/approval gate are unchanged.
+
+**Validation:** Passed with a mocked Gemini client: lint, 44 tests (14 new, covering zero/below-threshold/at-threshold Gemini gating, exact-tie/near-tie/non-close/boundary detection, the Gemini prompt carrying detected close decisions, deterministic output validating against `AudienceAnalysisSchema`, a deterministic analysis starting a creator review, and the two extracted UI helpers), typecheck, and production build.
+
+**Live end-to-end validation:** Passed on 2026-09-02 against the real zero-signal path for `luminous-archive`: `totalSubmissions = 0`, Gemini was skipped, and a deterministic `AudienceAnalysis` was returned that clearly identified itself as non-Gemini-generated. Creator review creation and creator approval still worked against this deterministic result, and `GET /api/creator-review/luminous-archive` returned `200` with status `"approved"`. The 5+ submission live Gemini path (`MIN_AUDIENCE_SUBMISSIONS = 5`) remains covered only by the mocked-client automated tests above; it was not re-run live during this validation.
 
 ## Phase 6 — Creator approval workflow — Completed
 

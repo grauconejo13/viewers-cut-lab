@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { analysisTriggerLabel, resolveErrorMessage } from "@/lib/creatorReviewUi";
 
 type CreatorReviewStatus =
   | "analysis_ready"
@@ -40,7 +41,13 @@ export function CreatorReviewPanel({
 }) {
   const [review, setReview] = useState<CreatorReview | null>(null);
   const [note, setNote] = useState("");
+  // busy: any request in flight (disables controls).
+  // analyzing: specifically the Gemini-backed startReview request, so the
+  // trigger can say "Analyzing audience signal…" rather than mislabeling
+  // the initial state check as an analysis in progress.
   const [busy, setBusy] = useState(true);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -58,11 +65,10 @@ export function CreatorReviewPanel({
         throw new Error(data.error ?? "Unable to load creator review.");
       setReview(data.review ?? null);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Unable to load creator review.",
-      );
+      setError(resolveErrorMessage(err, "Unable to load creator review."));
     } finally {
       setBusy(false);
+      setInitialLoad(false);
     }
   }, [movieId]);
 
@@ -75,6 +81,7 @@ export function CreatorReviewPanel({
 
   const startReview = async () => {
     setBusy(true);
+    setAnalyzing(true);
     setError("");
     try {
       const response = await fetch(`/api/creator-review/${movieId}`, {
@@ -88,11 +95,10 @@ export function CreatorReviewPanel({
         throw new Error(data.error ?? "Unable to start creator review.");
       setReview(data.review ?? null);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Unable to start creator review.",
-      );
+      setError(resolveErrorMessage(err, "Unable to start creator review."));
     } finally {
       setBusy(false);
+      setAnalyzing(false);
     }
   };
 
@@ -116,11 +122,7 @@ export function CreatorReviewPanel({
       setReview(data.review ?? null);
       setNote("");
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Unable to record creator decision.",
-      );
+      setError(resolveErrorMessage(err, "Unable to record creator decision."));
     } finally {
       setBusy(false);
     }
@@ -134,21 +136,33 @@ export function CreatorReviewPanel({
         </p>
         <h1>{title}</h1>
 
+        {initialLoad && (
+          <p aria-live="polite" className="story-announcement">
+            Loading creator review…
+          </p>
+        )}
+
         {error && (
           <p className="error" role="alert">
             {error}
           </p>
         )}
 
-        {!review && !busy && (
+        {!initialLoad && !review && (
           <div className="approval-panel">
             <div>
               <p className="panel-kicker">No analysis yet</p>
               <p>No creator review has been started for this film.</p>
             </div>
             <div className="approval-actions">
-              <button type="button" className="button" onClick={startReview}>
-                Run Audience Analysis
+              <button
+                type="button"
+                className="button"
+                disabled={busy}
+                aria-busy={analyzing}
+                onClick={startReview}
+              >
+                {analysisTriggerLabel(analyzing, "Run Audience Analysis")}
               </button>
             </div>
           </div>
@@ -233,9 +247,10 @@ export function CreatorReviewPanel({
                     type="button"
                     className="button button-quiet"
                     disabled={busy}
+                    aria-busy={analyzing}
                     onClick={startReview}
                   >
-                    Run New Analysis
+                    {analysisTriggerLabel(analyzing, "Run New Analysis")}
                   </button>
                 </>
               )}

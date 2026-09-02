@@ -63,6 +63,8 @@ Client-provided totals and percentages are never trusted. Counts and stable one-
 
 `GET /api/audience-analysis/[movieId]` sends only the trusted server-derived aggregate (counts, percentages, total submissions) and fictional movie/question metadata to Gemini - never session IDs, session hashes, or submission documents. The response is validated against a strict Zod schema before it is returned; invalid or unavailable output never reaches the client.
 
+Below a minimum-signal threshold (`MIN_AUDIENCE_SUBMISSIONS`, currently 5 trusted submissions, including zero), Gemini is not called at all - the endpoint returns a deterministic, clearly-labeled low-signal result instead (Phase 5B).
+
 - `200` — validated Audience Analyst result
 - `404` — unknown movie ID
 - `503` — Gemini or Firestore is not configured

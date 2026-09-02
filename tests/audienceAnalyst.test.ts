@@ -9,6 +9,7 @@ import {
   analyzeAudience,
   buildAudienceAnalystInput,
   geminiModelFromEnv,
+  MIN_AUDIENCE_SUBMISSIONS,
   type AudienceAnalystModel,
 } from "../src/lib/audienceAnalyst";
 import { MemoryVoteRepository } from "../src/lib/votes";
@@ -30,9 +31,16 @@ const mockModel = (text: string): AudienceAnalystModel => ({
   generate: async () => text,
 });
 
+/** Seeds enough distinct trusted submissions to clear MIN_AUDIENCE_SUBMISSIONS. */
+async function seedThresholdMet(repository: MemoryVoteRepository) {
+  for (let i = 0; i < MIN_AUDIENCE_SUBMISSIONS; i++) {
+    await repository.submit(movie.id, answers, `hash-${i}`);
+  }
+}
+
 test("returns validated analysis using only trusted aggregate data", async () => {
   const repository = new MemoryVoteRepository();
-  await repository.submit(movie.id, answers, "hash-a");
+  await seedThresholdMet(repository);
   const capturedPrompts: string[] = [];
   const model: AudienceAnalystModel = {
     generate: async (prompt) => {
@@ -44,7 +52,7 @@ test("returns validated analysis using only trusted aggregate data", async () =>
   assert.deepEqual(result, validAnalysis);
   assert.equal(capturedPrompts.length, 1);
   assert.match(capturedPrompts[0], /totalTrustedSubmissions/);
-  assert.doesNotMatch(capturedPrompts[0], /hash-a/);
+  assert.doesNotMatch(capturedPrompts[0], /hash-0/);
   assert.doesNotMatch(capturedPrompts[0], /sessionId/i);
   assert.doesNotMatch(capturedPrompts[0], /sessionHash/i);
 });
@@ -67,6 +75,7 @@ test("rejects an unknown movie ID before contacting the model", async () => {
 
 test("rejects model output that is not valid JSON", async () => {
   const repository = new MemoryVoteRepository();
+  await seedThresholdMet(repository);
   await assert.rejects(
     () => analyzeAudience(movie.id, repository, mockModel("not json")),
     AnalysisOutputError,
@@ -75,6 +84,7 @@ test("rejects model output that is not valid JSON", async () => {
 
 test("rejects model output that fails schema validation", async () => {
   const repository = new MemoryVoteRepository();
+  await seedThresholdMet(repository);
   const incomplete = { ...validAnalysis, recommendedDirection: undefined };
   await assert.rejects(
     () =>
@@ -89,6 +99,7 @@ test("rejects model output that fails schema validation", async () => {
 
 test("rejects model output with unexpected extra fields", async () => {
   const repository = new MemoryVoteRepository();
+  await seedThresholdMet(repository);
   const withExtra = { ...validAnalysis, sessionId: "should-not-be-here" };
   await assert.rejects(
     () =>
@@ -103,6 +114,7 @@ test("rejects model output with unexpected extra fields", async () => {
 
 test("propagates model failures as AnalysisModelError", async () => {
   const repository = new MemoryVoteRepository();
+  await seedThresholdMet(repository);
   const model: AudienceAnalystModel = {
     generate: async () => {
       throw new AnalysisModelError("Gemini request failed.");

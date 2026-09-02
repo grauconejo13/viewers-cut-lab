@@ -92,9 +92,10 @@ The route:
 
 1. resolves the fictional movie concept from the trusted server definitions, returning `404` for an unknown ID,
 2. reads the trusted aggregate for that movie through `VoteRepository.getAggregate()` - a read-only accessor that touches only the `prototypeVotes/{movieId}` summary document, never the `submissions` subcollection,
-3. sends Gemini only fictional movie/question metadata and the trusted counts/percentages/total, never session IDs, session hashes, or submission documents,
-4. requests structured JSON output constrained to the Audience Analyst schema,
-5. validates the response with a strict Zod schema (`AudienceAnalysisSchema`) before returning it; invalid JSON, schema failures, or extra fields are rejected as `502` rather than passed through.
+3. below `MIN_AUDIENCE_SUBMISSIONS` trusted submissions (Phase 5B; currently 5, including zero), skips Gemini entirely and returns a deterministic, schema-valid low-signal result instead,
+4. otherwise sends Gemini only fictional movie/question metadata, the trusted counts/percentages/total, and deterministically detected close decisions (Phase 5B), never session IDs, session hashes, or submission documents,
+5. requests structured JSON output constrained to the Audience Analyst schema,
+6. validates the response with a strict Zod schema (`AudienceAnalysisSchema`) before returning it; invalid JSON, schema failures, or extra fields are rejected as `502` rather than passed through.
 
 The Gemini call itself is isolated behind a small `AudienceAnalystModel` interface (`generate(prompt): Promise<string>`) so tests can mock the model without a live API call or key.
 
