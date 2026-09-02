@@ -10,6 +10,7 @@ import {
 import {
   ContinuityAlreadyExistsError,
   ContinuityAnalysisSchema,
+  ContinuityIssueConfidenceSchema,
   ContinuityNotFoundError,
   ContinuityOutputError,
   buildContinuityInput,
@@ -62,7 +63,7 @@ const validAnalysis = {
     {
       summary: "Memory-erasure rules remain undefined",
       evidence: "The scene establishes an effect but not its boundaries.",
-      confidence: "risk" as const,
+      confidence: "watchpoint" as const,
     },
   ],
   approvedDirectionAlignment: {
@@ -151,7 +152,7 @@ test("trusted continuity input includes movie, approved direction, and generated
   assert.doesNotMatch(serialized, /submission/i);
 });
 
-test("continuity prompt explicitly forbids invented unsupported facts and screenplay rewriting", async () => {
+test("continuity prompt defines confirmed, risk, and watchpoint without inventing facts", async () => {
   const creatorRepo = await approvedReviewRepo();
   const review = await creatorRepo.get(movie.id);
   assert.ok(review);
@@ -160,6 +161,16 @@ test("continuity prompt explicitly forbids invented unsupported facts and screen
   assert.match(prompt, /do not rewrite the screenplay/i);
   assert.match(prompt, /confidence=confirmed/i);
   assert.match(prompt, /confidence=risk/i);
+  assert.match(prompt, /confidence=watchpoint/i);
+  assert.match(prompt, /ordinary mystery/i);
+  assert.match(prompt, /future scenes must keep it consistent/i);
+});
+
+test("issue confidence schema accepts all three editorial classifications", () => {
+  for (const value of ["confirmed", "risk", "watchpoint"]) {
+    assert.equal(ContinuityIssueConfidenceSchema.safeParse(value).success, true);
+  }
+  assert.equal(ContinuityIssueConfidenceSchema.safeParse("maybe").success, false);
 });
 
 test("rejects non-JSON model output", async () => {
