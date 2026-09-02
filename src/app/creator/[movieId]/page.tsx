@@ -1,3 +1,4 @@
+import { ContinuityReviewPanel } from "@/components/ContinuityReviewPanel";
 import { CreatorReviewPanel } from "@/components/CreatorReviewPanel";
 import { movieConcepts } from "@/data/demo-data";
 
@@ -16,5 +17,14 @@ export default async function CreatorReviewPage({
         <p>The requested fictional story does not exist in this prototype.</p>
       </main>
     );
-  return <CreatorReviewPanel movieId={concept.id} title={concept.title} />;
+  return (
+    <>
+      <CreatorReviewPanel movieId={concept.id} title={concept.title} />
+      <main className="story-shell">
+        <div className="story-main">
+          <ContinuityReviewPanel movieId={concept.id} />
+        </div>
+      </main>
+    </>
+  );
 }
