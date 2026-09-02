@@ -9,7 +9,7 @@ import {
 type Issue = {
   summary: string;
   evidence: string;
-  confidence: "confirmed" | "risk";
+  confidence: "confirmed" | "risk" | "watchpoint";
 };
 
 type ContinuityReview = {
@@ -31,6 +31,12 @@ type ContinuityReview = {
   createdAt: string;
 };
 
+const issueLabels: Record<Issue["confidence"], string> = {
+  confirmed: "Confirmed issue",
+  risk: "Potential risk",
+  watchpoint: "Continuity watchpoint",
+};
+
 function IssueList({ title, issues }: { title: string; issues: Issue[] }) {
   return (
     <div>
@@ -41,7 +47,7 @@ function IssueList({ title, issues }: { title: string; issues: Issue[] }) {
         <ul>
           {issues.map((issue, index) => (
             <li key={`${issue.summary}-${index}`}>
-              <strong>{issue.summary}</strong> [{issue.confidence}] — {issue.evidence}
+              <strong>{issueLabels[issue.confidence]}: {issue.summary}</strong> — {issue.evidence}
             </li>
           ))}
         </ul>
