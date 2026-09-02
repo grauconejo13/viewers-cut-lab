@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   analysisTriggerLabel,
+  continuityTriggerLabel,
   resolveErrorMessage,
   sceneTriggerLabel,
 } from "../src/lib/creatorReviewUi";
@@ -57,5 +58,16 @@ test("sceneTriggerLabel falls back to the idle label when not generating", () =>
   assert.equal(
     sceneTriggerLabel(false, "Generate Opening Scene"),
     "Generate Opening Scene",
+  );
+});
+
+test("continuityTriggerLabel shows continuity-specific busy copy", () => {
+  assert.equal(
+    continuityTriggerLabel(true, "Run Continuity Check"),
+    "Checking story continuity…",
+  );
+  assert.equal(
+    continuityTriggerLabel(false, "Run Continuity Check"),
+    "Run Continuity Check",
   );
 });
