@@ -50,20 +50,34 @@ function IssueList({ title, issues }: { title: string; issues: Issue[] }) {
   );
 }
 
-export function ContinuityReviewPanel({
-  movieId,
-  enabled,
-}: {
-  movieId: string;
-  enabled: boolean;
-}) {
+export function ContinuityReviewPanel({ movieId }: { movieId: string }) {
+  const [eligible, setEligible] = useState(false);
   const [continuity, setContinuity] = useState<ContinuityReview | null>(null);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
-    if (!enabled) return;
     try {
+      const [reviewResponse, sceneResponse] = await Promise.all([
+        fetch(`/api/creator-review/${movieId}`),
+        fetch(`/api/opening-scene/${movieId}`),
+      ]);
+
+      if (!reviewResponse.ok || !sceneResponse.ok) {
+        setEligible(false);
+        return;
+      }
+
+      const reviewData = (await reviewResponse.json()) as {
+        review?: { status?: string };
+      };
+      if (reviewData.review?.status !== "approved") {
+        setEligible(false);
+        return;
+      }
+
+      setEligible(true);
+
       const response = await fetch(`/api/continuity-analysis/${movieId}`);
       if (response.status === 404) {
         setContinuity(null);
@@ -79,14 +93,13 @@ export function ContinuityReviewPanel({
     } catch (err) {
       setError(resolveErrorMessage(err, "Unable to load continuity analysis."));
     }
-  }, [enabled, movieId]);
+  }, [movieId]);
 
   useEffect(() => {
-    if (!enabled) return;
     void load();
-  }, [enabled, load]);
+  }, [load]);
 
-  if (!enabled) return null;
+  if (!eligible) return null;
 
   const runCheck = async () => {
     setChecking(true);
@@ -123,9 +136,7 @@ export function ContinuityReviewPanel({
         )}
 
         {!analysis && (
-          <p>
-            Run a continuity check after the approved opening scene is generated.
-          </p>
+          <p>Run a continuity check on the approved opening scene.</p>
         )}
 
         {analysis && (
