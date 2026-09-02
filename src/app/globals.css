@@ -1141,3 +1141,12 @@ nav a:hover,
     width: 100%;
   }
 }
+.screenplay-text {
+  white-space: pre-wrap;
+  font-family: "Courier New", Courier, monospace;
+  background: #1b1a18;
+  border: 1px solid var(--line);
+  padding: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+}

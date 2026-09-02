@@ -14,6 +14,16 @@ export function analysisTriggerLabel(analyzing: boolean, idleLabel: string): str
 }
 
 /**
+ * Label for the "Generate Opening Scene" trigger (Phase 7). Kept as its
+ * own function rather than reusing analysisTriggerLabel's hardcoded busy
+ * copy, since "Analyzing audience signal…" would be the wrong message
+ * while a screenplay scene is generating.
+ */
+export function sceneTriggerLabel(generating: boolean, idleLabel: string): string {
+  return generating ? "Generating opening scene…" : idleLabel;
+}
+
+/**
  * Resolves a caught value to a user-facing error message: an Error's own
  * message, or a safe fallback. Never surfaces a raw stack trace or
  * provider secret, since it only ever reads `.message` off an Error

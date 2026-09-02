@@ -2,7 +2,7 @@
 
 ## Status convention
 
-Phases 0 through 6 are complete, with Phase 6 implemented ahead of Phase 5B at the explicit request that directed that work. Phase 7 and all later work remain planned and must be explicitly implemented and validated before their status changes.
+Phases 0 through 7 are complete, with Phase 6 implemented ahead of Phase 5B at the explicit request that directed that work. Phase 8 and all later work remain planned and must be explicitly implemented and validated before their status changes.
 
 ## Phase 0 — Documentation and repository foundation — Completed
 
@@ -119,15 +119,30 @@ Implemented validated `POST /api/votes` submission, repository abstraction, one-
 
 **Known limitation:** `CreatorReviewRepository` is in-memory (`MemoryCreatorReviewRepository`) and resets on process restart; Firestore persistence for review state is deferred, structured so it can be added later without changing route contracts. Screenplay generation, continuity analysis, Agent Builder, and partner MCP remain explicitly out of scope for this phase.
 
-**Acceptance criteria:** Creator-review state is server-authoritative; invalid transitions are rejected deterministically; a screenplay cannot be generated before an approved review (enforced by the Phase 6 approval-gate helper, to be called once Phase 7 exists).
+**Acceptance criteria:** Creator-review state is server-authoritative; invalid transitions are rejected deterministically; a screenplay cannot be generated before an approved review (enforced by the Phase 6 approval-gate helper, now called by Phase 7's opening-scene generation).
 
 **Validation:** Passed with mocked dependencies: lint, 30 tests (12 new, covering valid/invalid transitions, decision-request validation, creator-note handling, and approval-gate behavior), typecheck, and production build.
 
 **Live end-to-end validation:** Passed on 2026-09-01 against the real creator flow for `luminous-archive`: real Gemini Audience Analyst execution, creator-review creation, creator-review UI rendering, and a successful `analysis_ready -> approved` transition. `GET /api/creator-review/luminous-archive` returned `200` with status `"approved"`, and approval-gate logic was confirmed intact.
 
-## Phase 7 — Opening-scene generation — Planned
+## Phase 7 — Opening-scene generation — Completed
 
-Produce one opening screenplay scene only after creator approval.
+**Scope:** Produce one reviewable opening screenplay scene, only from an approved creator review, without changing Phase 4B voting, the Phase 5A/5B Audience Analyst, or the Phase 6 creator-review workflow and approval gate.
+
+**Implemented:**
+
+- `src/lib/screenplay.ts` - a strict `OpeningSceneSchema` (`title`, `slugline`, `setting`, `timeOfDay`, `characters`, `scenePurpose`, `screenplay`, `unresolvedQuestions`), kept to one opening scene only; a server-only `@google/genai` Interactions API adapter (`sceneModelFromEnv`, model `gemini-3.6-flash`, same structured `response_format` pattern as the Phase 5A Audience Analyst); `generateOpeningScene()`, which calls the unchanged Phase 6 `requireApprovedReview()` gate before doing anything else - blocking deterministically for both "no review at all" and "review exists but not approved" - and refuses to regenerate if a scene already exists for the movie (`SceneAlreadyExistsError`, `409`) rather than silently overwriting one; a storage-agnostic `SceneRepository` (`get`/`save`) with an in-memory implementation, matching the Phase 4A/Phase 6 pattern so Firestore persistence can be added later without changing route contracts.
+- `GET /api/opening-scene/[movieId]` - retrieves the generated scene (`404` unknown movie or none generated yet).
+- `POST /api/opening-scene/[movieId]` - generates the scene (`404` unknown movie, `409` review not approved or a scene already exists, `503` missing Gemini configuration, `502` Gemini request failure or output that fails Zod validation).
+- `CreatorReviewPanel` - a "Generate Opening Scene" action shown only once the review is `approved`, with a distinct "Generating opening scene…" busy state (`sceneTriggerLabel`, mirroring but separate from Phase 5B's `analysisTriggerLabel`) and a readable screenplay-style presentation (slugline, setting/time, characters, scene purpose, a monospace preformatted screenplay block, unresolved questions). Once a scene exists, the action is replaced by a read-only note rather than allowing another click. Errors surface through the existing alert pattern. The public `/story/[movieId]` flow is untouched.
+
+**Known limitations:** `SceneRepository` is in-memory (`MemorySceneRepository`) and resets on process restart. Regeneration/versioning of a scene is not implemented - once a scene exists for a movie, generation is refused rather than regenerating. Restarting creator analysis after a scene has been generated does not reconcile or invalidate the existing scene - the two are not currently linked beyond the movie ID. Continuity/story-logic analysis, Agent Builder, and partner MCP remain unimplemented.
+
+**Acceptance criteria:** A scene is never generated without an approved creator review; the trusted input sent to Gemini contains no session IDs, session hashes, or submission documents; generated output is validated against `OpeningSceneSchema` before it is returned or stored; a second scene is never silently generated for the same movie.
+
+**Validation:** Passed with a mocked Gemini client: lint, 56 tests (12 new for `screenplay.ts` plus 2 new for the `sceneTriggerLabel` UI helper, covering generation blocked with no/unapproved review, generation allowed once approved, trusted-input exclusion of session/hash/submission data, valid output passing `OpeningSceneSchema`, invalid JSON and schema-invalid output failing safely, one-scene-only enforcement, and the scene-trigger loading-label helper), typecheck, and production build.
+
+**Live end-to-end validation:** Passed on 2026-09-02 against the real flow for `luminous-archive`: the creator review was approved, the approval gate allowed generation, real Gemini generation succeeded, exactly one structured opening scene was returned and rendered successfully in the creator workflow, `GET /api/opening-scene/luminous-archive` returned `200`, and regeneration remained disabled.
 
 ## Phase 8 — Continuity and story-logic analysis — Planned
 

@@ -1,6 +1,10 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { analysisTriggerLabel, resolveErrorMessage } from "@/lib/creatorReviewUi";
+import {
+  analysisTriggerLabel,
+  resolveErrorMessage,
+  sceneTriggerLabel,
+} from "@/lib/creatorReviewUi";
 
 type CreatorReviewStatus =
   | "analysis_ready"
@@ -23,6 +27,23 @@ type CreatorReview = {
   note?: string;
   createdAt: string;
   updatedAt: string;
+};
+
+type OpeningSceneResult = {
+  title: string;
+  slugline: string;
+  setting: string;
+  timeOfDay: string;
+  characters: string[];
+  scenePurpose: string;
+  screenplay: string;
+  unresolvedQuestions: string[];
+};
+
+type OpeningScene = {
+  movieId: string;
+  scene: OpeningSceneResult;
+  createdAt: string;
 };
 
 const statusLabels: Record<CreatorReviewStatus, string> = {
@@ -50,6 +71,10 @@ export function CreatorReviewPanel({
   const [initialLoad, setInitialLoad] = useState(true);
   const [error, setError] = useState("");
 
+  const [scene, setScene] = useState<OpeningScene | null>(null);
+  const [generatingScene, setGeneratingScene] = useState(false);
+  const [sceneError, setSceneError] = useState("");
+
   const load = useCallback(async () => {
     try {
       const response = await fetch(`/api/creator-review/${movieId}`);
@@ -72,12 +97,33 @@ export function CreatorReviewPanel({
     }
   }, [movieId]);
 
+  const loadScene = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/opening-scene/${movieId}`);
+      if (response.status === 404) {
+        setScene(null);
+        return;
+      }
+      const data = (await response.json()) as {
+        scene?: OpeningScene;
+        error?: string;
+      };
+      if (!response.ok)
+        throw new Error(data.error ?? "Unable to load the opening scene.");
+      setScene(data.scene ?? null);
+    } catch (err) {
+      setSceneError(resolveErrorMessage(err, "Unable to load the opening scene."));
+    }
+  }, [movieId]);
+
   useEffect(() => {
     // Fetch-on-mount is intentional: there is no external store to
-    // subscribe to here, just a one-time GET for the current review state.
+    // subscribe to here, just a one-time GET for the current review and
+    // scene state.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
-  }, [load]);
+    loadScene();
+  }, [load, loadScene]);
 
   const startReview = async () => {
     setBusy(true);
@@ -125,6 +171,31 @@ export function CreatorReviewPanel({
       setError(resolveErrorMessage(err, "Unable to record creator decision."));
     } finally {
       setBusy(false);
+    }
+  };
+
+  const generateScene = async () => {
+    setBusy(true);
+    setGeneratingScene(true);
+    setSceneError("");
+    try {
+      const response = await fetch(`/api/opening-scene/${movieId}`, {
+        method: "POST",
+      });
+      const data = (await response.json()) as {
+        scene?: OpeningScene;
+        error?: string;
+      };
+      if (!response.ok)
+        throw new Error(data.error ?? "Unable to generate the opening scene.");
+      setScene(data.scene ?? null);
+    } catch (err) {
+      setSceneError(
+        resolveErrorMessage(err, "Unable to generate the opening scene."),
+      );
+    } finally {
+      setBusy(false);
+      setGeneratingScene(false);
     }
   };
 
@@ -253,6 +324,69 @@ export function CreatorReviewPanel({
                     {analysisTriggerLabel(analyzing, "Run New Analysis")}
                   </button>
                 </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {review && review.status === "approved" && (
+          <div className="approval-panel">
+            <div>
+              <p className="panel-kicker">Opening scene</p>
+
+              {sceneError && (
+                <p className="error" role="alert">
+                  {sceneError}
+                </p>
+              )}
+
+              {!scene && <p>No opening scene has been generated yet.</p>}
+
+              {scene && (
+                <>
+                  <h3>{scene.scene.title}</h3>
+                  <p>
+                    <strong>{scene.scene.slugline}</strong>
+                  </p>
+                  <p>
+                    {scene.scene.setting} - {scene.scene.timeOfDay}
+                  </p>
+                  <p className="panel-kicker">Characters</p>
+                  <ul>
+                    {scene.scene.characters.map((c) => (
+                      <li key={c}>{c}</li>
+                    ))}
+                  </ul>
+                  <p className="panel-kicker">Scene purpose</p>
+                  <p>{scene.scene.scenePurpose}</p>
+                  <p className="panel-kicker">Screenplay</p>
+                  <pre className="screenplay-text">{scene.scene.screenplay}</pre>
+                  <p className="panel-kicker">Unresolved questions</p>
+                  <ul>
+                    {scene.scene.unresolvedQuestions.map((q) => (
+                      <li key={q}>{q}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+
+            <div className="approval-actions">
+              {!scene ? (
+                <button
+                  type="button"
+                  className="button"
+                  disabled={busy}
+                  aria-busy={generatingScene}
+                  onClick={generateScene}
+                >
+                  {sceneTriggerLabel(generatingScene, "Generate Opening Scene")}
+                </button>
+              ) : (
+                <small>
+                  An opening scene has already been generated for this film.
+                  Regeneration is not available in this prototype.
+                </small>
               )}
             </div>
           </div>
