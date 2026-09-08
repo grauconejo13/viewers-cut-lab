@@ -102,12 +102,22 @@ export function ContinuityReviewPanel({ movieId }: { movieId: string }) {
   }, [movieId]);
 
   useEffect(() => {
-    void load();
-    if (eligible) return;
+    const initialLoad = window.setTimeout(() => {
+      void load();
+    }, 0);
+
+    if (eligible) {
+      return () => window.clearTimeout(initialLoad);
+    }
+
     const interval = window.setInterval(() => {
       void load();
     }, 1500);
-    return () => window.clearInterval(interval);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+      window.clearInterval(interval);
+    };
   }, [eligible, load]);
 
   if (!eligible) return null;
