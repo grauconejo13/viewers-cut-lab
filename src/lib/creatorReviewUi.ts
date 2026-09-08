@@ -23,6 +23,11 @@ export function sceneTriggerLabel(generating: boolean, idleLabel: string): strin
   return generating ? "Generating opening scene…" : idleLabel;
 }
 
+/** Label for the Phase 8 continuity/story-logic check. */
+export function continuityTriggerLabel(checking: boolean, idleLabel: string): string {
+  return checking ? "Checking story continuity…" : idleLabel;
+}
+
 /**
  * Resolves a caught value to a user-facing error message: an Error's own
  * message, or a safe fallback. Never surfaces a raw stack trace or
