@@ -33,6 +33,16 @@
 - Firebase Authentication or Google sign-in may be added for stronger identity and creator authorization later.
 - Vercel hosts early previews; Cloud Run remains a possible final Google Cloud target.
 - Google Cloud Agent Builder is planned for the final agent workflow.
+- The hackathon ADK/ClickHouse integration runs Google ADK 2.8.0 and the
+  official `mcp-clickhouse` 0.6.0 server in separate local virtual environments
+  connected over stdio. This is required because those releases depend on
+  incompatible major versions of the Python MCP SDK (ADK requires 1.x;
+  `mcp-clickhouse` requires 2.x).
+- The ClickHouse MCP server remains read-only and exposes only its database,
+  table, and query tools to the ADK agent. The agent must query
+  `viewer_cut_events` for the requested movie before recommending a production
+  action, and lack of explicit creator approval keeps the existing approval
+  gate closed.
 - Responsibilities may begin as deterministic services and workflow modules rather than separate AI agents.
 - Stronger rate limiting, abuse controls, auditability, and retention policy remain later hardening work.
 

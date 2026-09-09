@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+/agent/.venv/
+/agent/.adk-venv/
 /.pnp
 .pnp.*
 .yarn/*
@@ -33,6 +35,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+
+# python
+__pycache__/
+*.py[cod]
 
 # vercel
 .vercel
