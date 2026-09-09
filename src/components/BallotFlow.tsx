@@ -13,6 +13,7 @@ export function BallotFlow({ concept }: { concept: MovieConcept }) {
     [answers, setAnswers] = useState<BallotAnswer>(initialAnswers),
     [error, setError] = useState(""),
     [note, setNote] = useState(""),
+    [submitError, setSubmitError] = useState(""),
     [status, setStatus] = useState<"idle" | "pending" | "duplicate" | "failed">(
       "idle",
     ),
@@ -60,6 +61,7 @@ export function BallotFlow({ concept }: { concept: MovieConcept }) {
   };
   const submit = async () => {
     setStatus("pending");
+    setSubmitError("");
     try {
       const key = "viewers-cut-anonymous-session";
       const sessionId =
@@ -74,13 +76,19 @@ export function BallotFlow({ concept }: { concept: MovieConcept }) {
       const data = (await response.json()) as {
         status?: "submitted" | "duplicate";
         aggregate?: VoteAggregate;
+        error?: string;
+        detail?: string;
       };
       if (response.status === 200 || response.status === 409) {
         setAggregate(data.aggregate ?? null);
         setStatus(data.status === "duplicate" ? "duplicate" : "idle");
         setStep(2);
-      } else setStatus("failed");
-    } catch {
+      } else {
+        setSubmitError(data.detail || data.error || `Request failed with status ${response.status}.`);
+        setStatus("failed");
+      }
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Unable to read the server response.");
       setStatus("failed");
     }
   };
@@ -221,13 +229,13 @@ export function BallotFlow({ concept }: { concept: MovieConcept }) {
                 ))}
               </div>
               {status === "failed" && (
-                <p
+                <div
                   className="error rounded-xl border border-red-400/30 bg-red-400/10 p-4 leading-relaxed"
                   role="alert"
                 >
-                  Your cut could not be submitted. Review your choices and try
-                  again.
-                </p>
+                  <strong>Submission failed.</strong>
+                  <p className="mb-0 mt-2 break-words text-sm">{submitError || "The server returned an unknown error."}</p>
+                </div>
               )}
               <nav className="story-navigation mt-5 flex-col gap-3 sm:flex-row">
                 <button
