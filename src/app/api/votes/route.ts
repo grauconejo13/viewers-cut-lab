@@ -28,9 +28,24 @@ export async function POST(request: Request) {
     if (error instanceof VoteValidationError)
       return NextResponse.json({ error: error.message }, { status: 400 });
     if (error instanceof VoteStoreError)
-      return NextResponse.json({ error: error.message }, { status: 503 });
+      return NextResponse.json(
+        { error: error.message, source: "vote-store" },
+        { status: 503 },
+      );
+
+    const details =
+      error instanceof Error
+        ? { name: error.name, message: error.message }
+        : { name: "UnknownError", message: String(error) };
+
+    console.error("Vote submission failed", details);
+
     return NextResponse.json(
-      { error: "Unable to submit your cut." },
+      {
+        error: "Unable to submit your cut.",
+        source: "firestore-submit",
+        details,
+      },
       { status: 500 },
     );
   }
