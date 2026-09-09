@@ -1,5 +1,6 @@
 import { ContinuityReviewPanel } from "@/components/ContinuityReviewPanel";
 import { CreatorReviewPanel } from "@/components/CreatorReviewPanel";
+import { ProductionIntelligencePanel } from "@/components/ProductionIntelligencePanel";
 import { movieConcepts } from "@/data/demo-data";
 
 export default async function CreatorReviewPage({
@@ -23,6 +24,7 @@ export default async function CreatorReviewPage({
       <section className="story-shell" aria-label="Continuity review">
         <div className="story-main">
           <ContinuityReviewPanel movieId={concept.id} />
+          <ProductionIntelligencePanel movieId={concept.id} />
         </div>
       </section>
     </>
