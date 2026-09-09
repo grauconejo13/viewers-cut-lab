@@ -152,15 +152,50 @@ export class FirestoreVoteRepository implements VoteRepository {
     );
   }
 }
+
+type ServiceAccountCredentials = {
+  client_email: string;
+  private_key: string;
+  project_id?: string;
+};
+
+function serviceAccountCredentialsFromEnv(): ServiceAccountCredentials | undefined {
+  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (!raw) return undefined;
+  try {
+    const parsed = JSON.parse(raw) as Partial<ServiceAccountCredentials>;
+    if (!parsed.client_email || !parsed.private_key)
+      throw new Error("missing client_email or private_key");
+    return {
+      client_email: parsed.client_email,
+      private_key: parsed.private_key,
+      project_id: parsed.project_id,
+    };
+  } catch {
+    throw new VoteStoreError("Google service account credentials are invalid.");
+  }
+}
+
 export function firestoreRepositoryFromEnv() {
   const projectId = process.env.FIRESTORE_PROJECT_ID,
     secret = process.env.VOTE_SESSION_HASH_SECRET;
   if (!projectId || !secret)
     throw new VoteStoreError("Firestore is not configured.");
+
+  const serviceAccount = serviceAccountCredentialsFromEnv();
+  const emulatorHost = process.env.FIRESTORE_EMULATOR_HOST;
   const db = new Firestore({
     projectId,
-    host: process.env.FIRESTORE_EMULATOR_HOST,
-    ssl: !process.env.FIRESTORE_EMULATOR_HOST,
+    host: emulatorHost,
+    ssl: !emulatorHost,
+    ...(serviceAccount
+      ? {
+          credentials: {
+            client_email: serviceAccount.client_email,
+            private_key: serviceAccount.private_key,
+          },
+        }
+      : {}),
   });
   return { repository: new FirestoreVoteRepository(db), secret };
 }
