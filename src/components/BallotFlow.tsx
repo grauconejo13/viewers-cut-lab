@@ -182,39 +182,62 @@ export function BallotFlow({ concept }: { concept: MovieConcept }) {
             </>
           )}
           {step === 1 && (
-            <div className="review">
-              <h3>Review Your Cut</h3>
-              {concept.ballotQuestions.map((q, i) => (
-                <div key={q.id}>
-                  <span>Scene {i + 1}</span>
-                  <strong>
-                    {q.options.find((o) => o.id === answers[q.id]?.[0])?.label}
-                  </strong>
-                  <button
-                    onClick={() => {
-                      setIndex(i);
-                      setStep(0);
-                    }}
-                  >
-                    Edit
-                  </button>
+            <div className="review space-y-4">
+              <div className="mb-5 flex items-end justify-between gap-4">
+                <div>
+                  <p className="mb-1 text-xs font-bold uppercase tracking-[0.14em] text-[#e6b762]">
+                    Your five decisions
+                  </p>
+                  <h3 className="m-0 text-2xl font-semibold tracking-tight">
+                    Review Your Cut
+                  </h3>
                 </div>
-              ))}
+                <span className="shrink-0 rounded-full border border-white/10 px-3 py-1 text-xs text-white/60">
+                  {concept.ballotQuestions.length} scenes
+                </span>
+              </div>
+              <div className="grid gap-3">
+                {concept.ballotQuestions.map((q, i) => (
+                  <div
+                    key={q.id}
+                    className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 rounded-xl border border-white/10 bg-white/[0.03] p-4 sm:grid-cols-[90px_1fr_auto]"
+                  >
+                    <span className="text-xs font-bold uppercase tracking-[0.12em] text-white/50">
+                      Scene {i + 1}
+                    </span>
+                    <strong className="col-start-1 row-start-2 pr-2 text-base leading-snug text-white sm:col-start-2 sm:row-start-1">
+                      {q.options.find((o) => o.id === answers[q.id]?.[0])?.label}
+                    </strong>
+                    <button
+                      className="col-start-2 row-span-2 row-start-1 min-h-11 rounded-lg border border-[#e6b762]/50 px-4 text-sm font-bold text-[#e6b762] transition hover:bg-[#e6b762]/10 sm:col-start-3 sm:row-span-1"
+                      onClick={() => {
+                        setIndex(i);
+                        setStep(0);
+                      }}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                ))}
+              </div>
               {status === "failed" && (
-                <p className="error" role="alert">
+                <p
+                  className="error rounded-xl border border-red-400/30 bg-red-400/10 p-4 leading-relaxed"
+                  role="alert"
+                >
                   Your cut could not be submitted. Review your choices and try
                   again.
                 </p>
               )}
-              <nav className="story-navigation">
+              <nav className="story-navigation mt-5 flex-col gap-3 sm:flex-row">
                 <button
-                  className="button button-quiet"
+                  className="button button-quiet w-full sm:w-auto"
                   onClick={() => setStep(0)}
                 >
                   Back
                 </button>
                 <button
-                  className="button"
+                  className="button w-full sm:w-auto"
                   disabled={status === "pending"}
                   onClick={submit}
                 >
