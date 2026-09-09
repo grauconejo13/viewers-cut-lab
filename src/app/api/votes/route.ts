@@ -27,11 +27,17 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof VoteValidationError)
       return NextResponse.json({ error: error.message }, { status: 400 });
-    if (error instanceof VoteStoreError)
+
+    if (error instanceof VoteStoreError) {
+      console.error("Vote store configuration failed", {
+        name: error.name,
+        message: error.message,
+      });
       return NextResponse.json(
-        { error: error.message, source: "vote-store" },
+        { error: "We couldn't save your cut. Please try again." },
         { status: 503 },
       );
+    }
 
     const details =
       error instanceof Error
@@ -41,11 +47,7 @@ export async function POST(request: Request) {
     console.error("Vote submission failed", details);
 
     return NextResponse.json(
-      {
-        error: "Unable to submit your cut.",
-        source: "firestore-submit",
-        details,
-      },
+      { error: "We couldn't save your cut. Please try again." },
       { status: 500 },
     );
   }
