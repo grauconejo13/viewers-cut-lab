@@ -2,3 +2,5 @@
 # google-adk 2.8.0's MCP adapter requires mcp>=1.24,<2.
 google-adk[mcp]==2.8.0
 google-cloud-aiplatform==2.1.0
+fastapi==0.141.1
+uvicorn==0.52.4
