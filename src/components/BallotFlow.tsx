@@ -77,18 +77,25 @@ export function BallotFlow({ concept }: { concept: MovieConcept }) {
         status?: "submitted" | "duplicate";
         aggregate?: VoteAggregate;
         error?: string;
-        detail?: string;
+        source?: string;
+        details?: { name?: string; message?: string };
       };
       if (response.status === 200 || response.status === 409) {
         setAggregate(data.aggregate ?? null);
         setStatus(data.status === "duplicate" ? "duplicate" : "idle");
         setStep(2);
       } else {
-        setSubmitError(data.detail || data.error || `Request failed with status ${response.status}.`);
+        const detail = data.details?.message;
+        const source = data.source ? ` [${data.source}]` : "";
+        setSubmitError(
+          `${detail || data.error || `Request failed with status ${response.status}.`}${source}`,
+        );
         setStatus("failed");
       }
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Unable to read the server response.");
+      setSubmitError(
+        err instanceof Error ? err.message : "Unable to read the server response.",
+      );
       setStatus("failed");
     }
   };
@@ -234,7 +241,9 @@ export function BallotFlow({ concept }: { concept: MovieConcept }) {
                   role="alert"
                 >
                   <strong>Submission failed.</strong>
-                  <p className="mb-0 mt-2 break-words text-sm">{submitError || "The server returned an unknown error."}</p>
+                  <p className="mb-0 mt-2 break-words text-sm">
+                    {submitError || "The server returned an unknown error."}
+                  </p>
                 </div>
               )}
               <nav className="story-navigation mt-5 flex-col gap-3 sm:flex-row">
